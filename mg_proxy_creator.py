@@ -29,6 +29,12 @@ def parseFile(file_path):
 		
 	return (valid_list, invalid_lines)
 
+def createNameList(valid_list):
+	result = []
+	for line in valid_list:
+		result = result + ([line[3]] * int(line[1]))
+	return result
+
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
 		print 'Please specify a file containing cards'
@@ -40,13 +46,7 @@ if __name__ == "__main__":
 		print 'Card file does not exist'
 		sys.exit()
 
-	print user_input[1]
 	creator = MgImageCreator()
+	creator.create(createNameList(user_input[0]), '/Users/Savo/Desktop/mg')
 
-	for card_tupple in user_input[0]:
-		card_numb, card_name = card_tupple[1], card_tupple[3]
-		im = getMgImage(card_name)
-		for _ in xrange(int(card_numb)):
-			creator.paste(im)
-
-	creator.save('/Users/Savo/Desktop/mg', 'test')
+	# creator.save('/Users/Savo/Desktop/mg', 'test')

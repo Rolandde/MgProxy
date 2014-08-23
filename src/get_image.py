@@ -8,9 +8,6 @@ def createAddress(card_name):
 
 def getMgImage(card_name):
 	address = createAddress(card_name)
-   
-
-
    	response = urllib.urlopen(address)
 
 	if response.getcode() != 200:

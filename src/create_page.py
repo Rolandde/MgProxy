@@ -2,6 +2,9 @@ from PIL import Image
 from constants import DPI, WIDTH, HIGHT, PAGE_X, PAGE_Y
 import os
 
+from get_image import getMgImage
+
+
 def createCanvas():
 	X = int(DPI * WIDTH * PAGE_X)
 	Y = int(DPI * HIGHT * PAGE_Y)
@@ -26,23 +29,29 @@ def pasteImage(canvas, image, x, y):
 class MgImageCreator(object):
 	def __init__(self):
 		self.pic_count = 0;
+		self.page_count = 0;
 		self.current_canvas = createCanvas()
-		self.canvas_list = []
 
 	def paste(self, image):
 		pasteImage(self.current_canvas, image, self.pic_count%PAGE_X, int(round(self.pic_count/PAGE_X, 0)))
 		self.pic_count += 1
 
-		if self.pic_count == PAGE_X * PAGE_Y:
-			self.canvas_list.append(self.current_canvas)
-			self.current_canvas = createCanvas()
-			self.pic_count = 0
+	def create(self, name_array, directory):
+		for name in name_array:
+			image = getMgImage(name)
+			self.paste(image)
+
+			if self.pic_count == PAGE_X * PAGE_Y:
+				self.save(directory, self.page_count)
+
+				self.current_canvas = createCanvas()
+				self.pic_count = 0
+				self.page_count += 1
+
+		if (self.pic_count > 0):
+			self.save(directory, self.page_count)
 
 	def save(self, directory, file_name):
-		if self.pic_count != 0:
-			self.canvas_list.append(self.current_canvas)
-
-		for i, canvas in enumerate(self.canvas_list):
-			new_file_name = file_name + str(i) + '.jpg'
-			file_path = os.path.join(directory, new_file_name)
-			canvas.save(file_path)
+		new_file_name = str(file_name) + '.jpg'
+		file_path = os.path.join(directory, new_file_name)
+		self.current_canvas.save(file_path)
