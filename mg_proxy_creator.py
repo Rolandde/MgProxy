@@ -56,7 +56,5 @@ if __name__ == "__main__":
 		print 'Card file does not exist'
 		sys.exit()
 
-	print user_input[1]
-
 	creator = MgImageCreator()
-	creator.create(createNameList(user_input[0]), '/Users/Savo/Desktop/mg')
+	creator.create(createNameList(user_input[0]), '/Users/Savo/Desktop/mg', 'test')

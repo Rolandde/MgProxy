@@ -36,7 +36,7 @@ class MgImageCreator(object):
 		pasteImage(self.current_canvas, image, self.pic_count%PAGE_X, int(round(self.pic_count/PAGE_X, 0)))
 		self.pic_count += 1
 
-	def create(self, name_array, directory):
+	def create(self, name_array, directory, file_name):
 		for name in name_array:
 			image = getMgImage(name)
 			self.paste(image)
@@ -49,9 +49,9 @@ class MgImageCreator(object):
 				self.page_count += 1
 
 		if (self.pic_count > 0):
-			self.save(directory, self.page_count)
+			self.save(directory, file_name)
 
 	def save(self, directory, file_name):
-		new_file_name = str(file_name) + '.jpg'
+		new_file_name = str(file_name) + str(self.page_count) + '.jpg'
 		file_path = os.path.join(directory, new_file_name)
 		self.current_canvas.save(file_path)
