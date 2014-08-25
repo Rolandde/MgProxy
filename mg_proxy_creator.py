@@ -13,7 +13,10 @@ def parseLine(line):
 	if match == None:
 		raise MgException('Invalid MWS line')
 
-	return match.groups()
+	parsed = list(match.groups())
+	parsed[1] = int(parsed[1])
+
+	return parsed
 	
 def parseFile(file_path):
 	'''Parses a MWS file, ignoring comment lines. Returns tupple with two elements: a list of valid and invalid lines'''
@@ -32,7 +35,7 @@ def parseFile(file_path):
 def createNameList(valid_list):
 	result = []
 	for line in valid_list:
-		result = result + ([line[3]] * int(line[1]))
+		result = result + ([line[3]] * line[1])
 	return result
 
 if __name__ == "__main__":
