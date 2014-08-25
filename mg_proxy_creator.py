@@ -11,9 +11,16 @@ def parseLine(line):
 	match = re.match(r'^\s*(?:(SB:)\s+)?(\d+)\s+(?:\[(\w*)\]\s+)?(.*)$', line)
 
 	if match == None:
-		raise MgException('Invalid MWS line')
+		raise MgException('Could not parse MWS line')
 
 	parsed = list(match.groups())
+
+	if parsed[1] == None:
+		raise MgException('Could not parse integer representing card number')
+
+	if parsed[3] == None:
+		raise MgException('Could not parse the card name')
+
 	parsed[1] = int(parsed[1])
 
 	return parsed
@@ -27,8 +34,8 @@ def parseFile(file_path):
 	for line in f:
 		try:
 			valid_list.append(parseLine(line))
-		except MgException:
-			invalid_lines.append(line)
+		except MgException as e:
+			invalid_lines.append((line, str(e)))
 		
 	return (valid_list, invalid_lines)
 
@@ -49,7 +56,7 @@ if __name__ == "__main__":
 		print 'Card file does not exist'
 		sys.exit()
 
+	print user_input[1]
+
 	creator = MgImageCreator()
 	creator.create(createNameList(user_input[0]), '/Users/Savo/Desktop/mg')
-
-	# creator.save('/Users/Savo/Desktop/mg', 'test')
