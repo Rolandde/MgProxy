@@ -1,12 +1,12 @@
 import argparse
 from constants import DPI, WIDTH, HIGHT, PAGE_X, PAGE_Y
 
-parser = argparse.ArgumentParser(
+arg_parser = argparse.ArgumentParser(
 	description='Create printer friendly constructed decks or random boosters (not implemented yet) for Magic the Gathering',
 	epilog='The Pillow module is required for this program to work'
 )
 
-parser.add_argument(
+arg_parser.add_argument(
 	'-c', '--constructed_deck', 
 	required=True,
 	help = 'File path containing cards in the following format: [SB:] card_number [set] card_name',
@@ -14,14 +14,14 @@ parser.add_argument(
 	type=str 
 	)
 	
-parser.add_argument(
+arg_parser.add_argument(
 	'--dpi',
 	help = 'Specify the dpi (pixels per inch) for printing. Default: 300dpi',
 	default = DPI,
 	type = int
 )
 
-parser.add_argument(
+arg_parser.add_argument(
 	'-x', '--card_dimensions',
 	help = 'The dimensions (in inches) of the cards, width by hight. Default: 2.49 3.49.',
 	nargs = 2,
@@ -30,7 +30,7 @@ parser.add_argument(
 	metavar = 'inch'
 )
 
-parser.add_argument(
+arg_parser.add_argument(
 	'-n', '--card_number',
 	help = 'The number of cards going across and down per page. Default: 4 and 2.',
 	nargs = 2,
@@ -39,7 +39,4 @@ parser.add_argument(
 	metavar = 'int'	
 )
 
-parser.add_argument
-	
-
-print vars(parser.parse_args())
+arg_parser.add_argument

@@ -5,6 +5,7 @@ import sys
 from src.create_page import MgImageCreator
 from src.get_image import getMgImage
 from src.constants import MgException
+from src.argv_input import arg_parser
 
 def parseLine(line):
 	'''Expects the following format: ['SB:'] int [SET: three char code] card name. Brackets denote optional info.'''
@@ -52,17 +53,15 @@ def splitFile(file_path):
 	return (directory, file_name)
 
 if __name__ == "__main__":
-	if len(sys.argv) < 2:
-		print 'Please specify a file containing cards'
-		sys.exit()
+	parsed_input = vars(arg_parser.parse_args())
 
 	try:
-		user_input = parseFile(sys.argv[1])
+		user_input = parseFile(parsed_input['constructed_deck'])
 	except IOError:
 		print 'Card file does not exist'
 		sys.exit()
 
-	file_path, file_name = splitFile(sys.argv[1])
+	file_path, file_name = splitFile(parsed_input['constructed_deck'])
 
 	creator = MgImageCreator()
 	creator.create(createNameList(user_input[0]), file_path, file_name)
