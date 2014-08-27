@@ -1,4 +1,5 @@
 import argparse
+from constants import DPI, WIDTH, HIGHT, PAGE_X, PAGE_Y
 
 parser = argparse.ArgumentParser(
 	description='Create printer friendly constructed decks or random boosters (not implemented yet) for Magic the Gathering',
@@ -16,7 +17,7 @@ parser.add_argument(
 parser.add_argument(
 	'--dpi',
 	help = 'Specify the dpi (pixels per inch) for printing. Default: 300dpi',
-	default = 300,
+	default = DPI,
 	type = int
 )
 
@@ -25,8 +26,17 @@ parser.add_argument(
 	help = 'The dimensions (in inches) of the cards, width by hight. Default: 2.49 3.49.',
 	nargs = 2,
 	type = int,
-	default = [2.49, 3.49],
+	default = [WIDTH, HIGHT],
 	metavar = 'inch'
+)
+
+parser.add_argument(
+	'-n', '--card_number',
+	help = 'The number of cards going across and down per page. Default: 4 and 2.',
+	nargs = 2,
+	type = int,
+	default = [PAGE_X, PAGE_Y],
+	metavar = 'int'	
 )
 
 parser.add_argument
