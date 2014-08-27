@@ -63,5 +63,5 @@ if __name__ == "__main__":
 
 	file_path, file_name = splitFile(parsed_input['constructed_deck'])
 
-	creator = MgImageCreator()
+	creator = MgImageCreator(parsed_input['dpi'], parsed_input['card_dimensions'], parsed_input['card_number'])
 	creator.create(createNameList(user_input[0]), file_path, file_name)

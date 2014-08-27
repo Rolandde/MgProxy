@@ -1,39 +1,40 @@
 from PIL import Image
-from constants import DPI, WIDTH, HIGHT, PAGE_X, PAGE_Y
 import os
 
 from get_image import getMgImage
 
 
-def createCanvas():
-	X = int(DPI * WIDTH * PAGE_X)
-	Y = int(DPI * HIGHT * PAGE_Y)
+def createCanvas(dpi, wh, xy):
+	X = int(dpi * wh[0] * xy[0])
+	Y = int(dpi * wh[1] * xy[1])
 
 	return Image.new('RGB', (X, Y), 'white')
 
-def resizeImage(image):
-	new_x = int(DPI * WIDTH)
-	new_y = int(DPI * HIGHT)
+def resizeImage(image, dpi, wh):
+	new_x = int(dpi * wh[0])
+	new_y = int(dpi * wh[1])
 
 	return image.resize((new_x, new_y), Image.ANTIALIAS)
 
-def pasteImage(canvas, image, x, y):
-	assert (x >= 0 and x < PAGE_X), 'Invalid image paste position' 
-	assert (y >= 0 and y < PAGE_Y), 'Invalid image paste position'
-
-	new_image = resizeImage(image)
-	canvas.paste(new_image, (new_image.size[0]*x, new_image.size[1]*y))
+def pasteImage(canvas, image, dpi, wh, xy):
+	new_image = resizeImage(image, dpi, wh)
+	canvas.paste(new_image, (new_image.size[0]*xy[0], new_image.size[1]*xy[1]))
 
 	return canvas
 
 class MgImageCreator(object):
-	def __init__(self):
+	def __init__(self, dpi, wh, xy):
+		self.dpi = dpi
+		self.wh = wh
+		self.xy = xy
+
 		self.pic_count = 0;
 		self.page_count = 0;
-		self.current_canvas = createCanvas()
+		self.current_canvas = createCanvas(dpi, wh, xy)
 
 	def paste(self, image):
-		pasteImage(self.current_canvas, image, self.pic_count%PAGE_X, int(round(self.pic_count/PAGE_X, 0)))
+		xy = (self.pic_count%self.xy[0], int(round(self.pic_count/self.xy[0], 0)))
+		pasteImage(self.current_canvas, image, self.dpi, self.wh, xy)
 		self.pic_count += 1
 
 	def create(self, name_array, directory, file_name):
@@ -41,10 +42,10 @@ class MgImageCreator(object):
 			image = getMgImage(name)
 			self.paste(image)
 
-			if self.pic_count == PAGE_X * PAGE_Y:
+			if self.pic_count == self.xy[0] * self.xy[1]:
 				self.save(directory, file_name)
 
-				self.current_canvas = createCanvas()
+				self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
 				self.pic_count = 0
 				self.page_count += 1
 
