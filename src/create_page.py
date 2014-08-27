@@ -42,7 +42,7 @@ class MgImageCreator(object):
 			self.paste(image)
 
 			if self.pic_count == PAGE_X * PAGE_Y:
-				self.save(directory, self.page_count)
+				self.save(directory, file_name)
 
 				self.current_canvas = createCanvas()
 				self.pic_count = 0

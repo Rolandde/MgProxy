@@ -45,6 +45,12 @@ def createNameList(valid_list):
 		result = result + ([line[3]] * line[1])
 	return result
 
+def splitFile(file_path):
+	abs_path = os.path.abspath(file_path)
+	directory, file_name = os.path.split(file_path)
+	file_name = os.path.splitext(file_name)[0]
+	return (directory, file_name)
+
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
 		print 'Please specify a file containing cards'
@@ -56,5 +62,7 @@ if __name__ == "__main__":
 		print 'Card file does not exist'
 		sys.exit()
 
+	file_path, file_name = splitFile(sys.argv[1])
+
 	creator = MgImageCreator()
-	creator.create(createNameList(user_input[0]), '/Users/Savo/Desktop/mg', 'test')
+	creator.create(createNameList(user_input[0]), file_path, file_name)
