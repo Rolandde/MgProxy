@@ -40,12 +40,6 @@ def parseFile(file_path):
 		
 	return (valid_list, invalid_lines)
 
-def createNameList(valid_list):
-	result = []
-	for line in valid_list:
-		result = result + ([line[3]] * line[1])
-	return result
-
 def splitFile(file_path):
 	abs_path = os.path.abspath(file_path)
 	directory, file_name = os.path.split(file_path)
@@ -64,4 +58,4 @@ if __name__ == "__main__":
 	file_path, file_name = splitFile(parsed_input['constructed_deck'])
 
 	creator = MgImageCreator(parsed_input['dpi'], parsed_input['card_dimensions'], parsed_input['card_number'])
-	creator.create(createNameList(user_input[0]), file_path, file_name)
+	creator.create(user_input[0], file_path, file_name)

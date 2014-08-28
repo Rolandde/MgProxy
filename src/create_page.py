@@ -38,16 +38,19 @@ class MgImageCreator(object):
 		self.pic_count += 1
 
 	def create(self, name_array, directory, file_name):
-		for name in name_array:
-			image = getMgImage(name)
-			self.paste(image)
+		for number_name in name_array:
+			number, card_name = number_name[1], number_name[3]
+			image = getMgImage(card_name)
 
-			if self.pic_count == self.xy[0] * self.xy[1]:
-				self.save(directory, file_name)
+			for _ in xrange(0, number):
+				self.paste(image)
 
-				self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
-				self.pic_count = 0
-				self.page_count += 1
+				if self.pic_count == self.xy[0] * self.xy[1]:
+					self.save(directory, file_name)
+
+					self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
+					self.pic_count = 0
+					self.page_count += 1
 
 		if (self.pic_count > 0):
 			self.save(directory, file_name)
