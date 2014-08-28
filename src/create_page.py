@@ -2,6 +2,7 @@ from PIL import Image
 import os
 
 from get_image import getMgImage, validateImage
+from constants import MgException
 
 
 def createCanvas(dpi, wh, xy):
@@ -38,24 +39,31 @@ class MgImageCreator(object):
 		self.pic_count += 1
 
 	def create(self, name_array, directory, file_name):
+		invalid_names = []
+
 		for number_name in name_array:
 			number, card_name = number_name[1], number_name[3]
 
-			image = getMgImage(card_name)
-			validateImage(image)
+			try:
+				image = getMgImage(card_name)
+				validateImage(image)
+			except MgException as e:
+				invalid_names.append((card_name, str(e)))
+			else:
+				for _ in xrange(0, number):
+					self.paste(image)
 
-			for _ in xrange(0, number):
-				self.paste(image)
+					if self.pic_count == self.xy[0] * self.xy[1]:
+						self.save(directory, file_name)
 
-				if self.pic_count == self.xy[0] * self.xy[1]:
-					self.save(directory, file_name)
-
-					self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
-					self.pic_count = 0
-					self.page_count += 1
+						self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
+						self.pic_count = 0
+						self.page_count += 1
 
 		if (self.pic_count > 0):
 			self.save(directory, file_name)
+
+		return invalid_names
 
 	def save(self, directory, file_name):
 		new_file_name = str(file_name) + str(self.page_count) + '.jpg'
