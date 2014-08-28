@@ -1,7 +1,7 @@
 from PIL import Image
 import os
 
-from get_image import getMgImage
+from get_image import getMgImage, validateImage
 
 
 def createCanvas(dpi, wh, xy):
@@ -40,7 +40,9 @@ class MgImageCreator(object):
 	def create(self, name_array, directory, file_name):
 		for number_name in name_array:
 			number, card_name = number_name[1], number_name[3]
+
 			image = getMgImage(card_name)
+			validateImage(image)
 
 			for _ in xrange(0, number):
 				self.paste(image)

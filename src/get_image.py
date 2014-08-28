@@ -21,3 +21,10 @@ def getMgImage(card_name):
 	image_stream = StringIO(image_stream)
 
 	return Image.open(image_stream)
+
+def validateImage(image):     
+	'''PIL does not provide a good way to test if an image is corrupt. The easiest way is to load the image into memory and catch the IOError'''
+	try:
+		image.load()
+	except IOError:
+		raise MgException('Image file is corrupt')
