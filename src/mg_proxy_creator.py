@@ -55,7 +55,7 @@ def errorLog(msg):
 		to_write = message[0].strip() + ': ' + message[1].strip() + '\n'
 		sys.stderr.write(to_write)
 
-if __name__ == "__main__":
+def main():
 	parsed_input = vars(arg_parser.parse_args())
 
 	try:
