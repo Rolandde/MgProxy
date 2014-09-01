@@ -46,11 +46,20 @@ def splitFile(file_path):
 	file_name = os.path.splitext(file_name)[0]
 	return (directory, file_name)
 
+def errorLog(msg):
+	'''Prints out error message to the error stream. Expects a list of two element tupples: the offending card/line and the reason'''
+	if len(msg) > 0:
+		sys.stderr.write('Errors caused certain pictures to be exluded:\n')
+
+	for message in msg:
+		to_write = message[0].strip() + ': ' + message[1].strip() + '\n'
+		sys.stderr.write(to_write)
+
 if __name__ == "__main__":
 	parsed_input = vars(arg_parser.parse_args())
 
 	try:
-		user_input = parseFile(parsed_input['constructed_deck'])
+		user_input, invalid_lines = parseFile(parsed_input['constructed_deck'])
 	except IOError:
 		print 'Card file does not exist'
 		sys.exit()
@@ -58,4 +67,7 @@ if __name__ == "__main__":
 	file_path, file_name = splitFile(parsed_input['constructed_deck'])
 
 	creator = MgImageCreator(parsed_input['dpi'], parsed_input['card_dimensions'], parsed_input['card_number'])
-	creator.create(user_input[0], file_path, file_name)
+	
+	invalid_cards = creator.create(user_input, file_path, file_name)
+
+	errorLog(invalid_lines + invalid_cards)
