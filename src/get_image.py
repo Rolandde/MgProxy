@@ -1,7 +1,12 @@
-import urllib
+import urllib, sys
 from StringIO import StringIO
-from PIL import Image
 from constants import MgException, BASE_URL
+
+try:
+	from PIL import Image
+except ImportError:
+	sys.stderr.write('Cannot run program. Python Pillow (preferred) or PIL module is required.')
+	sys.exit()
 
 def createAddress(card_name):
 	return BASE_URL + urllib.quote(card_name) + '.hq.jpg'
