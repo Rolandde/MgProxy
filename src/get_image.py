@@ -1,6 +1,6 @@
 import urllib, sys
 from StringIO import StringIO
-from constants import MgException, BASE_URL
+from .constants import MgException, BASE_URL
 
 try:
 	from PIL import Image
@@ -13,7 +13,7 @@ def createAddress(card_name):
 
 def getMgImage(card_name):
 	address = createAddress(card_name)
-   	response = urllib.urlopen(address)
+	response = urllib.urlopen(address)
 
 	if response.getcode() != 200:
 		raise MgException('Card URL does not exist. Error code: ' + str(response.getcode()) + ': ' + address)

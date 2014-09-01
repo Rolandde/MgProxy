@@ -6,8 +6,8 @@ except ImportError:
 	sys.stderr.write('Cannot run program. Python Pillow (preferred) or PIL module is required.')
 	sys.exit()
 
-from get_image import getMgImage, validateImage
-from constants import MgException
+from .get_image import getMgImage, validateImage
+from .constants import MgException
 
 
 def createCanvas(dpi, wh, xy):

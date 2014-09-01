@@ -61,7 +61,7 @@ def main():
 	try:
 		user_input, invalid_lines = parseFile(parsed_input['constructed_deck'])
 	except IOError:
-		print 'Card file does not exist'
+		sys.stderr.write('Card file does not exist')
 		sys.exit()
 
 	file_path, file_name = splitFile(parsed_input['constructed_deck'])
