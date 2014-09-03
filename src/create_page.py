@@ -68,6 +68,9 @@ class MgImageCreator(object):
 		if (self.pic_count > 0):
 			self.save(directory, file_name)
 
+		#Correctly reset the object so that a new name_array can be called
+		self.__init__(self.dpi, self.wh, self.xy)
+
 		return invalid_names
 
 	def save(self, directory, file_name):
