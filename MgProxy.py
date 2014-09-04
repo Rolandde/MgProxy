@@ -7,6 +7,9 @@ if sys.version_info[0] != 2:
 from src.mg_proxy_creator import main
 
 if __name__ == "__main__":
+	'''Run the main program. Uncaught errors are displayed to the user.
+	TODO: Also create a file with more detailed error report.
+	'''
 	try:
 		main()
 	except:

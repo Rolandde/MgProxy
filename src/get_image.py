@@ -9,9 +9,13 @@ except ImportError:
 	sys.exit()
 
 def createAddress(card_name):
+	'''Creates a URL from a card name, correctly escaping characters.
+	TODO: This can be easily expanded to allow specific sets to be downloaded.
+	'''
 	return BASE_URL + urllib.quote(card_name) + '.hq.jpg'
 
 def getMgImage(card_name):
+	'''Downloads a given card name and returns the Pillow image. Note that this function does not check if the downloaded image is a valid image file.'''
 	address = createAddress(card_name)
 	response = urllib.urlopen(address)
 

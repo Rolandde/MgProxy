@@ -8,13 +8,16 @@ from src.constants import MgException
 from src.argv_input import arg_parser
 
 def parseLine(line):
-	'''Expects the following format: ['SB:'] int [SET: three char code] card name. Brackets denote optional info.'''
+	'''Expects the following format: ['SB:'] int [SET: three char code] card name. Brackets denote optional info. A four element list is returned, with the four fields. If the optional ones are not specified, None is the value.
+
+	TODO: Rather then returning a list, it might be better to return a dictionary for legibilities sake.
+	'''
 	match = re.match(r'^\s*(?:(SB:)\s+)?(\d+)\s+(?:\[(\w*)\]\s+)?(.*)$', line)
 
 	if match == None:
 		raise MgException('Could not parse MWS line')
 
-	parsed = list(match.groups())
+	parsed = list(match.groups())  #Tupple is immutable, so conversion into a list
 
 	if parsed[1] == None:
 		raise MgException('Could not parse integer representing card number')
@@ -27,7 +30,7 @@ def parseLine(line):
 	return parsed
 	
 def parseFile(file_path):
-	'''Parses a MWS file, ignoring comment lines. Returns tupple with two elements: a list of valid and invalid lines'''
+	'''Parses a MWS file, ignoring comment lines. Returns tupple with two elements: a list of valid and invalid lines.'''
 	valid_list = []
 	invalid_lines = []
 	f = open(file_path, 'rU')
@@ -41,9 +44,10 @@ def parseFile(file_path):
 	return (valid_list, invalid_lines)
 
 def splitFile(file_path):
-	abs_path = os.path.abspath(file_path)
+	'''Takes a file path and returns the two element tupple: the directory and the file name. The second element will be an empty string if only a directory path is given.'''
+	abs_path = os.path.abspath(file_path)  #In case relative path is provided
 	directory, file_name = os.path.split(file_path)
-	file_name = os.path.splitext(file_name)[0]
+	file_name = os.path.splitext(file_name)[0] #Removes any extension in the filename
 	return (directory, file_name)
 
 def errorLog(msg):
@@ -56,6 +60,7 @@ def errorLog(msg):
 		sys.stderr.write(to_write)
 
 def main():
+	'''Runs the program. Parses the user command (argparse) and shunts the supplied info to the correct function'''
 	parsed_input = vars(arg_parser.parse_args())
 
 	try:
