@@ -10,8 +10,9 @@ if __name__ == "__main__":
 	'''Run the main program. Uncaught errors are displayed to the user.
 	TODO: Also create a file with more detailed error report.
 	'''
-	try:
-		main()
-	except:
-		error_msg = 'Unexpected error of type ' + str(sys.exc_info()[0]) + '\n'
-		sys.stderr.write(error_msg)
+	# try:
+	# 	main()
+	# except:
+	# 	error_msg = 'Unexpected error of type ' + str(sys.exc_info()[0]) + '\n'
+	# 	sys.stderr.write(error_msg)
+	main()

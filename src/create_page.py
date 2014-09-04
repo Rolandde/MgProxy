@@ -56,11 +56,22 @@ class MgImageCreator(object):
 		pasteImage(self.current_canvas, image, self.dpi, self.wh, xy)
 		self.pic_count += 1
 
+	def pasteMulti(self, image, number, directory, file_name):
+		'''Pastes the provided image the specified number of times, saving the canvas as required.'''
+		for _ in xrange(0, number):
+			self.paste(image)
+
+			if self.pic_count == self.xy[0] * self.xy[1]:
+				self.save(directory, file_name)
+
+				self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
+				self.pic_count = 0
+				self.page_count += 1
+
 	def create(self, name_array, directory, file_name):
 		'''Takes a name_array containing the number and name of cards and creates images of those cards.
 		Returns a list of two element tupples: the name and reason of any cards that could not be successfully pasted.
 
-		TODO: Split this function into two. The pasting of images should be independant of the input and saving.
 		TODO: Include the option of specifying sets.
 		'''
 		for number_name in name_array:
@@ -71,16 +82,8 @@ class MgImageCreator(object):
 				validateImage(image)
 			except MgException as e:
 				self.invalid_names.append((card_name, str(e)))
-			else:	#TODO: This should be a seperate function, with the validateImage function moved into it
-				for _ in xrange(0, number):
-					self.paste(image)
-
-					if self.pic_count == self.xy[0] * self.xy[1]:
-						self.save(directory, file_name)
-
-						self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
-						self.pic_count = 0
-						self.page_count += 1
+			else:
+				self.pasteMulti(image, number, directory, file_name)
 
 		if (self.pic_count > 0):
 			self.save(directory, file_name)
