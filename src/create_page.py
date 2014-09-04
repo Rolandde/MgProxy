@@ -41,9 +41,11 @@ class MgImageCreator(object):
 		self.wh = wh
 		self.xy = xy
 
-		self.pic_count = 0;  #How many pictures have been pasted
-		self.page_count = 0; #How many pages have been saved
+		self.pic_count = 0  #How many pictures have been pasted
+		self.page_count = 0 #How many pages have been saved
+
 		self.current_canvas = createCanvas(dpi, wh, xy)
+		self.invalid_names = []  #Holds a list of two element tupples: the name of invalid cards and the reason.
 
 	def paste(self, image):
 		'''Pastes the image into the next slot on the canvas.
@@ -61,8 +63,6 @@ class MgImageCreator(object):
 		TODO: Split this function into two. The pasting of images should be independant of the input and saving.
 		TODO: Include the option of specifying sets.
 		'''
-		invalid_names = []
-
 		for number_name in name_array:
 			number, card_name = number_name[1], number_name[3]
 
@@ -70,7 +70,7 @@ class MgImageCreator(object):
 				image = getMgImage(card_name)
 				validateImage(image)
 			except MgException as e:
-				invalid_names.append((card_name, str(e)))
+				self.invalid_names.append((card_name, str(e)))
 			else:	#TODO: This should be a seperate function, with the validateImage function moved into it
 				for _ in xrange(0, number):
 					self.paste(image)
@@ -84,6 +84,9 @@ class MgImageCreator(object):
 
 		if (self.pic_count > 0):
 			self.save(directory, file_name)
+
+		#This assigns the invalid_names by value (default is reference), as the init function will be called to reset the instance
+		invalid_names = list(self.invalid_names)
 
 		#Correctly reset the object so that the instance can be called anew
 		self.__init__(self.dpi, self.wh, self.xy)
