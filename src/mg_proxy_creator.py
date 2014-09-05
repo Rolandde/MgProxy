@@ -10,7 +10,7 @@ from src.argv_input import arg_parser
 def parseLine(line):
 	'''Expects the following format: ['SB:'] int [SET: three char code] card name. Brackets denote optional info. A four element list is returned, with the four fields. If the optional ones are not specified, None is the value.
 
-	TODO: Rather then returning a list, it might be better to return a dictionary for legibilities sake.
+	TODO: Rather then returning a list, it might be better to return a dictionary for legibilities sake. DAVE WAS HERE!
 	'''
 	match = re.match(r'^\s*(?:(SB:)\s+)?(\d+)\s+(?:\[(\w*)\]\s+)?(.*)$', line)
 
