@@ -79,7 +79,7 @@ class MgImageCreator(object):
 
 		return invalid_names
 
-	def create(self, name_array, directory, file_name):
+	def create(self, local, name_array, directory, file_name):
 		'''Takes a name_array containing the number and name of cards and creates images of those cards.
 		Returns a list of two element tupples: the name and reason of any cards that could not be successfully pasted.
 
@@ -89,7 +89,10 @@ class MgImageCreator(object):
 			number, card_name = number_name[1], number_name[3]
 
 			try:
-				image = getMgImage(card_name)
+				if local:
+					pass
+				else:
+					image = getMgImage(card_name)
 				validateImage(image)
 			except MgException as e:
 				self.invalid_names.append((card_name, str(e)))
@@ -113,3 +116,6 @@ class MgImageCreator(object):
 		except IOError as e:
 			error_msg = (file_name, 'Could not save final image - ' + e.strerror + ' - ' + e.filename)
 			self.invalid_names.append(error_msg)
+
+	def createFromWeb(self, name_array, directory, file_name):
+		return self.create(False, name_array, directory, file_name)

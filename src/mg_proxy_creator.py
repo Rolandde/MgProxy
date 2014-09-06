@@ -73,6 +73,6 @@ def main():
 
 	creator = MgImageCreator(parsed_input['dpi'], parsed_input['card_dimensions'], parsed_input['card_number'])
 	
-	invalid_cards = creator.create(user_input, file_path, file_name)
+	invalid_cards = creator.createFromWeb(user_input, file_path, file_name)
 
 	errorLog(invalid_lines + invalid_cards)
