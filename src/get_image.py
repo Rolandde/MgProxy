@@ -1,4 +1,7 @@
-import urllib, sys
+import urllib
+import sys
+import os
+
 from StringIO import StringIO
 from .constants import MgException, BASE_URL
 
@@ -30,6 +33,20 @@ def getMgImage(card_name):
 	image_stream = StringIO(image_stream)
 
 	return Image.open(image_stream)
+
+def createLocalAddress(directory, card_name):
+	'''Create a valid local address from a directory and a card name (including extension)'''
+	return os.path.join(directory, card_name)
+
+def getLocalMgImage(directory, card_name):
+	address = createLocalAddress(directory, card_name)
+
+	try:
+		card_image = Image.open(address)
+	except IOError:
+		raise MgException('Cannot open local card image file')
+	else:
+		return card_image
 
 def validateImage(image):     
 	'''PIL does not provide a good way to test if an image is corrupt. The easiest way is to load the image into memory and catch the IOError'''
