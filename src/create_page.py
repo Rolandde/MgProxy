@@ -68,6 +68,17 @@ class MgImageCreator(object):
 				self.pic_count = 0
 				self.page_count += 1
 
+	def reset(self):
+		'''Returns the instance to the initial state and returns any errors that have occured since the last reset.'''
+
+		#This assigns the invalid_names by value (default is reference), as the init function will be called to reset the instance
+		invalid_names = list(self.invalid_names)
+
+		#Correctly reset the object so that the instance can be called anew
+		self.__init__(self.dpi, self.wh, self.xy)
+
+		return invalid_names
+
 	def create(self, name_array, directory, file_name):
 		'''Takes a name_array containing the number and name of cards and creates images of those cards.
 		Returns a list of two element tupples: the name and reason of any cards that could not be successfully pasted.
@@ -88,13 +99,7 @@ class MgImageCreator(object):
 		if (self.pic_count > 0):
 			self.save(directory, file_name)
 
-		#This assigns the invalid_names by value (default is reference), as the init function will be called to reset the instance
-		invalid_names = list(self.invalid_names)
-
-		#Correctly reset the object so that the instance can be called anew
-		self.__init__(self.dpi, self.wh, self.xy)
-
-		return invalid_names
+		return self.reset()
 
 	def save(self, directory, file_name):
 		'''Saves the file_name to the directory. It will alwasy save as a jpg. To prevent overwriting previously saved pages, a integer counter is appended at the end of the filename.
