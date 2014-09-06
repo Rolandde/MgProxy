@@ -107,4 +107,9 @@ class MgImageCreator(object):
 		'''
 		new_file_name = str(file_name) + str(self.page_count) + '.jpg'
 		file_path = os.path.join(directory, new_file_name)
-		self.current_canvas.save(file_path)
+
+		try:
+			self.current_canvas.save(file_path)
+		except IOError as e:
+			error_msg = (file_name, 'Could not save final image - ' + e.strerror + ' - ' + e.filename)
+			self.invalid_names.append(error_msg)
