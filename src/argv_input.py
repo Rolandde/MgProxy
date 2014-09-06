@@ -7,8 +7,7 @@ arg_parser = argparse.ArgumentParser(
 )
 
 arg_parser.add_argument(
-	'-c', '--constructed_deck', 
-	required=True,
+	'file_name',
 	help = 'File path containing cards in the following format: [SB:] card_number [set] card_name',
 	metavar='file_path',
 	type=str 

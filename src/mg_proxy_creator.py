@@ -62,14 +62,15 @@ def errorLog(msg):
 def main():
 	'''Runs the program. Parses the user command (argparse) and shunts the supplied info to the correct function'''
 	parsed_input = vars(arg_parser.parse_args())
+	file_name = parsed_input['file_name']
 
 	try:
-		user_input, invalid_lines = parseFile(parsed_input['constructed_deck'])
+		user_input, invalid_lines = parseFile(file_name)
 	except IOError:
 		sys.stderr.write('Card file does not exist')
 		sys.exit()
 
-	file_path, file_name = splitFile(parsed_input['constructed_deck'])
+	file_path, file_name = splitFile(file_name)
 
 	creator = MgImageCreator(parsed_input['dpi'], parsed_input['card_dimensions'], parsed_input['card_number'])
 	
