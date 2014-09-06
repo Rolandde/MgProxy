@@ -74,6 +74,9 @@ def main():
 
 	creator = MgImageCreator(parsed_input['dpi'], parsed_input['card_dimensions'], parsed_input['card_number'])
 	
-	invalid_cards = creator.createFromWeb(user_input, file_path, file_name)
+	if parsed_input['local_file']:
+		invalid_cards = creator.createFromLocal(user_input, file_path, file_name)
+	else:
+		invalid_cards = creator.createFromWeb(user_input, file_path, file_name)
 
 	errorLog(invalid_lines + invalid_cards)
