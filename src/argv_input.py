@@ -6,13 +6,30 @@ arg_parser = argparse.ArgumentParser(
 	epilog='The Pillow module is required for this program to work'
 )
 
+#Required file name
 arg_parser.add_argument(
 	'file_name',
 	help = 'File path containing cards in the following format: [SB:] card_number [set] card_name',
 	metavar='file_path',
 	type=str 
 	)
-	
+
+#Mutually exclusive arguements
+source_of_image = arg_parser.add_mutually_exclusive_group()
+
+source_of_image.add_argument(
+	'-w', '--web_based',
+	help = 'Obtain image from web (Default)',
+	action = 'store_true'
+)
+
+source_of_image.add_argument(
+	'-l', '--local_file',
+	help = 'Obtain local image from directory containing file_name',
+	action = 'store_true'
+)
+
+#Optional arguements	
 arg_parser.add_argument(
 	'--dpi',
 	help = 'Specify the dpi (pixels per inch) for printing. Default: 300dpi',
