@@ -6,7 +6,7 @@ except ImportError:
 	sys.stderr.write('Cannot run program. Python Pillow (preferred) or PIL module is required.')
 	sys.exit()
 
-from .get_image import getMgImage, validateImage
+from .get_image import getMgImage, getLocalMgImage, validateImage
 from .constants import MgException
 
 
@@ -80,7 +80,7 @@ class MgImageCreator(object):
 		return invalid_names
 
 	def create(self, local, name_array, directory, file_name):
-		'''Takes a name_array containing the number and name of cards and creates images of those cards.
+		'''Takes a name_array containing the number and name of cards and creates images of those cards. Local is a boolean specifying if the cards are local or online.
 		Returns a list of two element tupples: the name and reason of any cards that could not be successfully pasted.
 
 		TODO: Include the option of specifying sets.
@@ -90,7 +90,7 @@ class MgImageCreator(object):
 
 			try:
 				if local:
-					pass
+					image = getLocalMgImage(directory, card_name)
 				else:
 					image = getMgImage(card_name)
 				validateImage(image)
@@ -118,4 +118,9 @@ class MgImageCreator(object):
 			self.invalid_names.append(error_msg)
 
 	def createFromWeb(self, name_array, directory, file_name):
+		'''Wrapper function to run image creation from web-based image files.'''
 		return self.create(False, name_array, directory, file_name)
+
+	def createFromLocal(self, name_array, directory, file_name):
+		'''Wrapper function to run image creation from local files.'''
+		return self.create(True, name_array, directory, file_name)
