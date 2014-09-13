@@ -4,6 +4,7 @@ import os
 
 from StringIO import StringIO
 from .constants import MgException, BASE_URL
+from urlparse import urljoin
 
 try:
 	from PIL import Image
@@ -11,15 +12,25 @@ except ImportError:
 	sys.stderr.write('Cannot run program. Python Pillow (preferred) or PIL module is required.')
 	sys.exit()
 
-def createAddress(card_name):
-	'''Creates a URL from a card name, correctly escaping characters.
-	TODO: This can be easily expanded to allow specific sets to be downloaded.
-	'''
-	return BASE_URL + urllib.quote(card_name) + '.hq.jpg'
+def createAddress(card_name, set_name=None):
+	'''Creates a URL from a card name and an optional set, correctly escaping characters.'''
+	return_url = BASE_URL
 
-def getMgImage(card_name):
+	if set_name:
+		if len(set_name) < 4:
+			set_url_dir = 'set'
+		else:
+			set_url_dir = 'setname'
+
+		return_url = urljoin(return_url, set_url_dir)
+		return_url = urljoin(return_url, set_name)
+
+	hq_card_name = urllib.quote(card_name + '.hq.jpg')
+	return urljoin(return_url, hq_card_name)
+
+def getMgImage(card_name, set_name=None):
 	'''Downloads a given card name and returns the Pillow image. Note that this function does not check if the downloaded image is a valid image file.'''
-	address = createAddress(card_name)
+	address = createAddress(card_name, set_name)
 	response = urllib.urlopen(address)
 
 	if response.getcode() != 200:
