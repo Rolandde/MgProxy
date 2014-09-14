@@ -18,12 +18,16 @@ def createAddress(card_name, set_name=None):
 
 	if set_name:
 		if len(set_name) < 4:
-			set_url_dir = 'set'
+			set_url_dir = 'set/'
 		else:
-			set_url_dir = 'setname'
+			set_url_dir = 'setname/'
 
 		return_url = urljoin(return_url, set_url_dir)
+
+		set_name = set_name + '/'
 		return_url = urljoin(return_url, set_name)
+	else:
+		return_url = urljoin(return_url, 'card/')
 
 	hq_card_name = urllib.quote(card_name + '.hq.jpg')
 	return urljoin(return_url, hq_card_name)

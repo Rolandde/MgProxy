@@ -86,16 +86,17 @@ class MgImageCreator(object):
 		TODO: Include the option of specifying sets.
 		'''
 		for number_name in name_array:
-			number, card_name = number_name[1], number_name[3]
+			number, set_name, card_name = number_name[1], number_name[2], number_name[3]
 
 			try:
 				if local:
 					image = getLocalMgImage(directory, card_name)
 				else:
-					image = getMgImage(card_name)
+					image = getMgImage(card_name, set_name)
 				validateImage(image)
 			except MgException as e:
-				self.invalid_names.append((card_name, str(e)))
+				error_msg = set_name + '/' + card_name if set_name else card_name 
+				self.invalid_names.append((error_msg, str(e)))
 			else:
 				self.pasteMulti(image, number, directory, file_name)
 
