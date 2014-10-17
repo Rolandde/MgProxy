@@ -55,7 +55,7 @@ def splitFile(file_path):
     '''Takes a file path and returns (directory, file_name) tupple.
     The file_name will be an empty string if only a directory path is given.'''
     abs_path = os.path.abspath(file_path)  # In case relative path is provided
-    directory, file_name = os.path.split(file_path)
+    directory, file_name = os.path.split(abs_path)
     # Removes any extension in the filename
     file_name = os.path.splitext(file_name)[0]
     return (directory, file_name)
