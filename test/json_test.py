@@ -17,5 +17,30 @@ class GetAndParseMTGJson(unittest.TestCase):
         '''Test if json file is correctly downloaded and returned'''
         self.assertDictEqual(self.mtg_file, get_mtg_json.getSetJson('M10'))
 
+    def test_parse_json(self):
+        '''Test if json file has been corretly parsed'''
+        expected_rarity = [
+            'Common', 'Uncommon', 'Rare', 'Mythic Rare', 'Basic Land'
+        ]
+
+        mtg_json = get_mtg_json.getSetJson('M10')
+        mtg_parsed = get_mtg_json.parseSetForRarity(mtg_json)
+
+        self.assertItemsEqual(
+            mtg_parsed.keys(), expected_rarity,
+            'Not all expected rarities have been parsed'
+        )
+
+        cards_json = mtg_json['cards']
+        for card in cards_json:
+            card_name = card['name']
+            card_rarity = card['rarity']
+
+            self.assertIn(
+                card_name, mtg_parsed[card_rarity],
+                card_name + 'not in the expected rarity of ' + card_rarity
+            )
+
+
 if __name__ == '__main__':
     unittest.main()

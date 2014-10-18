@@ -35,3 +35,21 @@ def getSetJson(set_name):
     json_stream = response.read(json_size)
 
     return json.loads(json_stream)
+
+
+def parseSetForRarity(set_dict):
+    '''Returns a dictionary with rarity (key) and list of card names (value)'''
+    all_cards = set_dict['cards']
+    result_dict = {}
+
+    for card in all_cards:
+        card_name = card['name']
+        card_rarity = card['rarity']
+
+        # If first card with given rarity found, start an empty list
+        if card_rarity not in result_dict:
+            result_dict[card_rarity] = []
+
+        result_dict[card_rarity].append(card_name)
+
+    return result_dict
