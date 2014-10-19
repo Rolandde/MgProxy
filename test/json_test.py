@@ -24,7 +24,7 @@ class GetAndParseMTGJson(unittest.TestCase):
         ]
 
         mtg_json = get_mtg_json.getSetJson('M10')
-        mtg_parsed = get_mtg_json.parseSetForRarity(mtg_json)
+        mtg_parsed = get_mtg_json.parseLocalSetForRarity(mtg_json)
 
         self.assertItemsEqual(
             mtg_parsed.keys(), expected_rarity,
@@ -41,6 +41,11 @@ class GetAndParseMTGJson(unittest.TestCase):
                 card_name + 'not in the expected rarity of ' + card_rarity
             )
 
+        web_parsed = get_mtg_json.parseSetForRarity('M10')
+        self.assertDictEqual(
+            mtg_parsed, web_parsed,
+            'Wrapper function does not equal individual functions'
+        )
 
 if __name__ == '__main__':
     unittest.main()
