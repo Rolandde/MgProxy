@@ -36,17 +36,19 @@ def parseLine(line):
 
 
 def parseFile(file_path):
-    '''Parses a MWS file, ignoring comment lines. Returns tupple with two
-    elements: a list of valid and invalid lines.'''
+    '''Parses a MWS file, ignoring comment and empty lines. Returns tupple with
+    two elements: a list of valid and invalid lines.'''
     valid_list = []
     invalid_lines = []
     f = open(file_path, 'rU')
 
     for line in f:
-        try:
-            valid_list.append(parseLine(line))
-        except MgException as e:
-            invalid_lines.append((line, str(e)))
+        # Ignore lines that are whitespace only or start with //
+        if not (line.isspace() or re.match(r'^\s*//', line)):
+            try:
+                valid_list.append(parseLine(line))
+            except MgException as e:
+                invalid_lines.append((line, str(e)))
 
     return (valid_list, invalid_lines)
 
