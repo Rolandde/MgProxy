@@ -1,10 +1,14 @@
 import re
 import os.path
 import sys
+import logging
 
 from src.create_page import MgImageCreator
 from src.constants import MgException
 from src.argv_input import arg_parser
+
+# Initiate module logger (mg_logger as root)
+logger = logging.getLogger('mg_logger.mg_proxy_creator')
 
 
 def parseLine(line):
@@ -78,6 +82,9 @@ def main():
     '''Runs the program.
     Parses the user command (argparse) and shunts data to correct function'''
     parsed_input = vars(arg_parser.parse_args())
+
+    logger.info('MgProxy is doing its thing!')
+
     file_name = parsed_input['file_name']
 
     try:
