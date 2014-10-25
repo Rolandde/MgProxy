@@ -2,13 +2,13 @@ import re
 import os.path
 import sys
 
-from src.create_page import MgImageCreator
-from src.constants import MgException
-from src.argv_input import arg_parser
+from .create_page import MgImageCreator
+from .constants import MgException
+from .argv_input import arg_parser
 
 import logging
 import logging.config
-from src.logger_dict import MG_LOGGER
+from .logger_dict import MG_LOGGER
 
 
 def parseLine(line):
