@@ -3,3 +3,5 @@
 mg_test.txt
 *.jpg
 .ropeproject/
+src/.ropeproject/
+test/.ropeproject/ 
