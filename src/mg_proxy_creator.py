@@ -1,11 +1,14 @@
 import re
 import os.path
 import sys
-import logging
 
 from src.create_page import MgImageCreator
 from src.constants import MgException
 from src.argv_input import arg_parser
+
+import logging
+import logging.config
+from src.logger_dict import MG_LOGGER
 
 
 def parseLine(line):
@@ -75,6 +78,11 @@ def errorLog(msg):
         sys.stderr.write(to_write)
 
 
+def createMainLogger():
+    '''Creates the main logger used in MgProxy'''
+    logging.config.dictConfig(MG_LOGGER)
+
+
 def createFromWebOrLocal(parsed_input):
     '''Takes parsed input from arg_parser and shunts it to function'''
     logger = logging.getLogger(
@@ -109,8 +117,12 @@ def createFromWebOrLocal(parsed_input):
 
 
 def main():
-    '''Runs the program and parses the user command (argparse)'''
+    '''The first function to be run by the program.
+
+    Runs the program, starts the logger, and parses the user command (argparse).
+    '''
 
     # If there are errors or if -h tag is used, program stops at this line
     parsed_input = vars(arg_parser.parse_args())
+    createMainLogger()
     createFromWebOrLocal(parsed_input)
