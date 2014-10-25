@@ -60,5 +60,3 @@ arg_parser.add_argument(
         PAGE_X,
         PAGE_Y],
     metavar='int')
-
-arg_parser.add_argument
