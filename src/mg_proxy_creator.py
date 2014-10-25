@@ -8,7 +8,7 @@ from .argv_input import arg_parser
 
 import logging
 import logging.config
-from .logger_dict import MG_LOGGER
+from .logger_dict import MG_LOGGER, getLoggerName
 
 
 def parseLine(line):
@@ -86,7 +86,7 @@ def createMainLogger():
 def createFromWebOrLocal(parsed_input):
     '''Takes parsed input from arg_parser and shunts it to function'''
     logger = logging.getLogger(
-        'mg_logger.mg_proxy_creator.createFromWeborLocal'
+        getLoggerName(createFromWebOrLocal)
     )
     logger.info('MgProxy is doing its thing!')
 
