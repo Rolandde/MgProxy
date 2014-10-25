@@ -116,13 +116,14 @@ def createFromWebOrLocal(parsed_input):
     errorLog(invalid_lines + invalid_cards)
 
 
-def main():
+def main(args=None):
     '''The first function to be run by the program.
 
     Runs the program, starts the logger, and parses the user command (argparse).
+    By default, args is none and parse_argv will use sys.args.
     '''
 
     # If there are errors or if -h tag is used, program stops at this line
-    parsed_input = vars(arg_parser.parse_args())
+    parsed_input = vars(arg_parser.parse_args(args))
     createMainLogger()
     createFromWebOrLocal(parsed_input)
