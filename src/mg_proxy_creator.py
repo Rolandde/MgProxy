@@ -75,14 +75,11 @@ def errorLog(msg):
         sys.stderr.write(to_write)
 
 
-def main():
-    '''Runs the program.
-    Parses the user command (argparse) and shunts data to correct function'''
-
-    # If there are errors or if -h tag is used, program stops at this line
-    parsed_input = vars(arg_parser.parse_args())
-
-    logger = logging.getLogger('mg_logger.mg_proxy_creator.main')
+def createFromWebOrLocal(parsed_input):
+    '''Takes parsed input from arg_parser and shunts it to function'''
+    logger = logging.getLogger(
+        'mg_logger.mg_proxy_creator.createFromWeborLocal'
+    )
     logger.info('MgProxy is doing its thing!')
 
     file_name = parsed_input['file_name']
@@ -109,3 +106,11 @@ def main():
         invalid_cards = creator.createFromWeb(user_input, file_path, file_name)
 
     errorLog(invalid_lines + invalid_cards)
+
+
+def main():
+    '''Runs the program and parses the user command (argparse)'''
+
+    # If there are errors or if -h tag is used, program stops at this line
+    parsed_input = vars(arg_parser.parse_args())
+    createFromWebOrLocal(parsed_input)
