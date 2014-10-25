@@ -1,1 +1,4 @@
 *.pyc
+# This file holds test input for MgProxy
+mg_test.txt
+*.jpg
