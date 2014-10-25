@@ -7,9 +7,6 @@ from src.create_page import MgImageCreator
 from src.constants import MgException
 from src.argv_input import arg_parser
 
-# Initiate module logger (mg_logger as root)
-logger = logging.getLogger('mg_logger.mg_proxy_creator')
-
 
 def parseLine(line):
     '''Parses input lines for card information.
@@ -81,8 +78,11 @@ def errorLog(msg):
 def main():
     '''Runs the program.
     Parses the user command (argparse) and shunts data to correct function'''
+
+    # If there are errors or if -h tag is used, program stops at this line
     parsed_input = vars(arg_parser.parse_args())
 
+    logger = logging.getLogger('mg_logger.mg_proxy_creator.main')
     logger.info('MgProxy is doing its thing!')
 
     file_name = parsed_input['file_name']
