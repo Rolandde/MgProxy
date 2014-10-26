@@ -1,5 +1,4 @@
 '''Specifies the logger and logger functions used for this application'''
-import inspect
 
 MG_LOGGER = {
     'version': 1,
@@ -27,17 +26,3 @@ MG_LOGGER = {
 MG_LOGGER_CONST = {
     'base_name': 'mg_logger'
 }
-
-
-def getLoggerName(function):
-    '''Takes a function and returns the logger name for this function.
-
-    Combined the name of the base logger, the module, and the function name
-    (seperated by dots) to get the logger name.
-    '''
-    name = (
-        MG_LOGGER_CONST['base_name'] + '.' +
-        inspect.getmodule(function).__name__ + '.' + function.__name__
-    )
-
-    return name
