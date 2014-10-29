@@ -36,7 +36,10 @@ class LoggerTests(unittest.TestCase):
         # sys.argv always returns a list, so I need to supply a list
         main([self.helper_file_path('empty_input.txt')])
         self.log_capt.check(
-            (MG_LOGGER_CONST['base_name'], 'INFO', 'MgProxy is doing its thing!'),
+            (
+                MG_LOGGER_CONST['base_name'], 'INFO',
+                MG_LOGGER_CONST['start_prog']
+            ),
         )
 
     def helper_file_path(self, file_name):

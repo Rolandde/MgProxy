@@ -80,7 +80,7 @@ def errorLog(msg):
 
 def createFromWebOrLocal(parsed_input):
     '''Takes parsed input from arg_parser and shunts it to function'''
-    logger.info('MgProxy is doing its thing!')
+    logger.info(MG_LOGGER_CONST['start_prog'])
 
     file_name = parsed_input['file_name']
 

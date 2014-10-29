@@ -24,5 +24,12 @@ MG_LOGGER = {
 
 
 MG_LOGGER_CONST = {
-    'base_name': 'mg_logger'
+    # The name of the default logger
+    'base_name': 'mg_logger',
+
+    # The program has started
+    'start_prog': 'MgProxy is doing its thing!',
+
+    # Info message that card has been successfully added
+    'good_paste': '%d copies of %s successfully added.'
 }
