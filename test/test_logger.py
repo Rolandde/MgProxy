@@ -35,17 +35,20 @@ class LoggerTests(unittest.TestCase):
         '''Tests the log output for an empty file'''
         # sys.argv always returns a list, so I need to supply a list
         main([self.helper_file_path('empty_input.txt')])
-        self.log_capt.check(
-            (
-                MG_LOGGER_CONST['base_name'], 'INFO',
-                MG_LOGGER_CONST['start_prog']
-            ),
-        )
+        self.log_capt.check(self.log_start())
 
     def helper_file_path(self, file_name):
         '''Return the relative file path from the module root'''
         base_path = 'test/files'
         return os.path.join(base_path, file_name)
+
+    def log_start(self):
+        '''Returns program start log message tuple for testing purposes'''
+        return (
+            MG_LOGGER_CONST['base_name'], 'INFO',
+            MG_LOGGER_CONST['start_prog']
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
