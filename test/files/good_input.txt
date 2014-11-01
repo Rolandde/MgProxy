@@ -1,0 +1,3 @@
+//Syntatically correct and all the cards exist
+2 Swamp
+2 [M10] Forest

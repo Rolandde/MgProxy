@@ -44,6 +44,18 @@ class LoggerTests(unittest.TestCase):
             self.log_total(0, 0)
         )
 
+    def test_correct_file(self):
+        '''Tests syntatically correct files where all cards exist'''
+        file_path = self.helper_file_path('good_input.txt')
+
+        # sys.argv always returns a list, so I need to supply a list
+        main([file_path])
+        self.log_capt.check(
+            self.log_start(),
+            self.log_save(file_path),
+            self.log_total(4, 1)
+        )
+
     def helper_file_path(self, file_name):
         '''Return the relative file path from the module root'''
         base_path = 'test/files'
