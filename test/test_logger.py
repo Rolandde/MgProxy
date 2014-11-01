@@ -38,7 +38,11 @@ class LoggerTests(unittest.TestCase):
 
         # sys.argv always returns a list, so I need to supply a list
         main([file_path])
-        self.log_capt.check(self.log_start(), self.log_save(file_path))
+        self.log_capt.check(
+            self.log_start(),
+            self.log_save(file_path),
+            self.log_total(0, 0)
+        )
 
     def helper_file_path(self, file_name):
         '''Return the relative file path from the module root'''
@@ -58,6 +62,13 @@ class LoggerTests(unittest.TestCase):
         return (
             MG_LOGGER_CONST['base_name'], 'INFO',
             MG_LOGGER_CONST['save_loc'] % directory
+        )
+
+    def log_total(self, card_numb, page_numb):
+        '''Returns log message stating card number pasted across numb pages'''
+        return (
+            MG_LOGGER_CONST['base_name'], 'INFO',
+            MG_LOGGER_CONST['final_msg'] % (card_numb, page_numb)
         )
 
 

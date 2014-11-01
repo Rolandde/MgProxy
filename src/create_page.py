@@ -1,5 +1,6 @@
 import os
 import sys
+import logging
 
 try:
     from PIL import Image
@@ -12,6 +13,10 @@ except ImportError:
 
 from .get_image import getMgImage, getLocalMgImage, validateImage
 from .constants import MgException
+
+from .logger_dict import MG_LOGGER_CONST
+
+logger = logging.getLogger(MG_LOGGER_CONST['base_name'])
 
 
 def createCanvas(dpi, wh, xy):
@@ -145,6 +150,9 @@ class MgImageCreator(object):
 
         if (self.pic_count > 0):
             self.save(directory, file_name)
+
+        logger.info(MG_LOGGER_CONST['final_msg'] %
+                    (self.total_pic, self.page_count))
 
         return self.reset()
 
