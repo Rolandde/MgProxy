@@ -91,6 +91,7 @@ def createFromWebOrLocal(parsed_input):
         sys.exit()
 
     file_path, file_name = splitFile(file_name)
+    logger.info(MG_LOGGER_CONST['save_loc'] % file_path)
 
     creator = MgImageCreator(
         parsed_input['dpi'],

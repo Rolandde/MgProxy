@@ -30,6 +30,9 @@ MG_LOGGER_CONST = {
     # The program has started
     'start_prog': 'MgProxy is doing its thing!',
 
+    # The directory where the files are saved to
+    'save_loc': 'Files will be saved in %s',
+
     # Info message that card has been successfully added
     'good_paste': '%d copies of %s successfully added.'
 }

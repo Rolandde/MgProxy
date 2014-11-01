@@ -4,7 +4,7 @@ import logging.config
 import os.path
 
 from src.logger_dict import MG_LOGGER, MG_LOGGER_CONST
-from src.mg_proxy_creator import main
+from src.mg_proxy_creator import main, splitFile
 
 # If testfixtures in not available, skip these tests
 SKIP_TEST = False
@@ -16,6 +16,7 @@ except ImportError:
 
 @unittest.skipIf(SKIP_TEST, 'Testfixtures module not found')
 class LoggerTests(unittest.TestCase):
+
     '''Test if MgProxy correctly logs messages to console'''
 
     @classmethod
@@ -33,9 +34,11 @@ class LoggerTests(unittest.TestCase):
 
     def test_empty_file(self):
         '''Tests the log output for an empty file'''
+        file_path = self.helper_file_path('empty_input.txt')
+
         # sys.argv always returns a list, so I need to supply a list
-        main([self.helper_file_path('empty_input.txt')])
-        self.log_capt.check(self.log_start())
+        main([file_path])
+        self.log_capt.check(self.log_start(), self.log_save(file_path))
 
     def helper_file_path(self, file_name):
         '''Return the relative file path from the module root'''
@@ -47,6 +50,14 @@ class LoggerTests(unittest.TestCase):
         return (
             MG_LOGGER_CONST['base_name'], 'INFO',
             MG_LOGGER_CONST['start_prog']
+        )
+
+    def log_save(self, file_path):
+        '''Returns log message stating the save directory'''
+        directory, file_name = splitFile(file_path)
+        return (
+            MG_LOGGER_CONST['base_name'], 'INFO',
+            MG_LOGGER_CONST['save_loc'] % directory
         )
 
 
