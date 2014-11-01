@@ -63,7 +63,8 @@ class MgImageCreator(object):
         self.wh = wh
         self.xy = xy
 
-        self.pic_count = 0  # How many pictures have been pasted
+        self.pic_count = 0  # How many pictures on the current page
+        self.total_pic = 0  # Total number of pictures pasted
         self.page_count = 0  # How many pages have been saved
 
         self.current_canvas = createCanvas(dpi, wh, xy)
@@ -83,6 +84,7 @@ class MgImageCreator(object):
                     self.pic_count/self.xy[0], 0)))
         pasteImage(self.current_canvas, image, self.dpi, self.wh, xy)
         self.pic_count += 1
+        self.total_pic += 1
 
     def pasteMulti(self, image, number, directory, file_name):
         '''Pastes the provided image the specified number of times, saving the
