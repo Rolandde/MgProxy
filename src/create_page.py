@@ -93,9 +93,15 @@ class MgImageCreator(object):
             if self.pic_count == self.xy[0] * self.xy[1]:
                 self.save(directory, file_name)
 
-                self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
-                self.pic_count = 0
-                self.page_count += 1
+    def startNextPage(self):
+        '''Prepares a new blank page for pasting of images.
+
+        It clears the current canvas, resents the pic counter and
+        increases the page count.
+        '''
+        self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
+        self.pic_count = 0
+        self.page_count += 1
 
     def reset(self):
         '''Returns the instance to the initial state and returns any errors that
@@ -159,6 +165,8 @@ class MgImageCreator(object):
                 ' - ' +
                 e.filename)
             self.invalid_names.append(error_msg)
+
+        self.startNextPage()
 
     def createFromWeb(self, name_array, directory, file_name):
         '''Wrapper function to run image creation from web-based image files.'''
