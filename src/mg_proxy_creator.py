@@ -23,11 +23,12 @@ def parseLine(line):
     match = re.match(r'^\s*(?:(SB:)\s+)?(\d+)\s+(?:\[(\w*)\]\s+)?(.*)$', line)
 
     if match is None:
-        raise MgException('Could not parse MWS line')
+        raise MgException(MG_LOGGER_CONST['bad_parse'])
 
     # Tupple is immutable, so conversion into a list
     parsed = list(match.groups())
 
+    # These two errors should never happen, as re.match should return None
     if parsed[1] is None:
         raise MgException('Could not parse integer representing card number')
 

@@ -37,7 +37,10 @@ MG_LOGGER_CONST = {
     'final_msg': 'Summary: %d card(s) pasted across %d page(s).',
 
     # Info message that card has been successfully added
-    'good_paste': '%d repeat(s) of %s successfully added.'
+    'good_paste': '%d repeat(s) of %s successfully added.',
+
+    # Failed to parse input line
+    'bad_parse': 'Could not parse MWS line'
 }
 
 
