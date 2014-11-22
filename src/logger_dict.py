@@ -37,5 +37,13 @@ MG_LOGGER_CONST = {
     'final_msg': 'Summary: %d card(s) pasted across %d page(s).',
 
     # Info message that card has been successfully added
-    'good_paste': '%d copies of %s successfully added.'
+    'good_paste': '%d repeat(s) of %s successfully added.'
 }
+
+
+def logCardName(card_input):
+    '''Takes a tuple of card_input and returns a stardard string for logging'''
+    if card_input[2]:
+        return '[%s] %s' % (card_input[2], card_input[3])
+    else:
+        return card_input[3]

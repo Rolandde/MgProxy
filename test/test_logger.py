@@ -3,7 +3,7 @@ import unittest
 import logging.config
 import os.path
 
-from src.logger_dict import MG_LOGGER, MG_LOGGER_CONST
+from src.logger_dict import MG_LOGGER, MG_LOGGER_CONST, logCardName
 from src.mg_proxy_creator import main, splitFile
 
 # If testfixtures in not available, skip these tests
@@ -53,6 +53,8 @@ class LoggerTests(unittest.TestCase):
         self.log_capt.check(
             self.log_start(),
             self.log_save(file_path),
+            self.log_card_paste((None, 2, None, 'Swamp')),
+            self.log_card_paste((None, 2, 'M10', 'Forest')),
             self.log_total(4, 1)
         )
 
@@ -66,6 +68,14 @@ class LoggerTests(unittest.TestCase):
         return (
             MG_LOGGER_CONST['base_name'], 'INFO',
             MG_LOGGER_CONST['start_prog']
+        )
+
+    def log_card_paste(self, card_input):
+        '''Returns log message when a card is succesfully pasted'''
+        card_name = logCardName(card_input)
+        return (
+            MG_LOGGER_CONST['base_name'], 'INFO',
+            MG_LOGGER_CONST['good_paste'] % (card_input[1], card_name)
         )
 
     def log_save(self, file_path):
