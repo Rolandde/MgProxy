@@ -20,7 +20,7 @@ def parseLine(line):
     TODO: Rather then returning a list, it might be better to return a
     dictionary for legibilities sake. DAVE WAS HERE!
     '''
-    match = re.match(r'^\s*(?:(SB:)\s+)?(\d+)\s+(?:\[(\w*)\]\s+)?(.*)$', line)
+    match = re.match(r'^\s*(?:(SB:)\s+)?(\d+)\s+(?:\[(\w*)\]\s+)?(\S.*)$', line)
 
     if match is None:
         raise MgException(MG_LOGGER_CONST['bad_parse'] % line)
