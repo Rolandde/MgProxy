@@ -58,6 +58,29 @@ class LoggerTests(unittest.TestCase):
             self.log_total(4, 1)
         )
 
+    def test_bad_parse(self):
+        '''Test various versions of bad parse'''
+        file_path = self.helper_file_path('bad_parse_input.txt')
+
+        # sys.argv always returns a list, so I need to supply a list
+        main([file_path])
+        self.log_capt.check(
+            self.log_start(),
+            self.log_save(file_path),
+            self.log_card_paste((None, 2, None, 'Swamp')),
+            self.log_card_paste((None, 2, 'M10', 'Forest')),
+            self.log_bad_parse('Forest'),
+            self.log_bad_parse('[M10] Forest'),
+            self.log_bad_parse('SB: Forest'),
+            self.log_bad_parse('A Forest'),
+            self.log_bad_parse('2'),
+            self.log_bad_parse('SB: 2'),
+            self.log_bad_parse('2 [M10]'),
+            self.log_bad_parse('2Forest'),
+            self.log_bad_parse('SB: 1[M10] Forest'),
+            self.log_total(4, 1)
+        )
+
     def helper_file_path(self, file_name):
         '''Return the relative file path from the module root'''
         base_path = 'test/files'
@@ -91,6 +114,13 @@ class LoggerTests(unittest.TestCase):
         return (
             MG_LOGGER_CONST['base_name'], 'INFO',
             MG_LOGGER_CONST['final_msg'] % (card_numb, page_numb)
+        )
+
+    def log_bad_parse(self, line):
+        '''Error message when input line cannot be parsed'''
+        return (
+            MG_LOGGER_CONST['base_name'], 'ERROR',
+            MG_LOGGER_CONST['bad_parse'] % line
         )
 
 

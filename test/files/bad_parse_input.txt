@@ -1,0 +1,12 @@
+//Bad parse input (the first two lines are correct)
+SB: 2 Swamp
+2 [M10] Forest
+Forest
+[M10] Forest
+SB: Forest
+A Forest
+2
+SB: 2
+2 [M10]
+2Forest
+SB: 1[M10] Forest

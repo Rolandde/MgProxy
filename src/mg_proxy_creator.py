@@ -23,7 +23,7 @@ def parseLine(line):
     match = re.match(r'^\s*(?:(SB:)\s+)?(\d+)\s+(?:\[(\w*)\]\s+)?(.*)$', line)
 
     if match is None:
-        raise MgException(MG_LOGGER_CONST['bad_parse'])
+        raise MgException(MG_LOGGER_CONST['bad_parse'] % line)
 
     # Tupple is immutable, so conversion into a list
     parsed = list(match.groups())
