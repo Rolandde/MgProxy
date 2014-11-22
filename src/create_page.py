@@ -1,6 +1,5 @@
 import os
 import sys
-import logging
 
 try:
     from PIL import Image
@@ -15,8 +14,6 @@ from .get_image import getMgImage, getLocalMgImage, validateImage
 from .constants import MgException
 
 from .logger_dict import MG_LOGGER_CONST, logCardName
-
-logger = logging.getLogger(MG_LOGGER_CONST['base_name'])
 
 
 def createCanvas(dpi, wh, xy):
@@ -63,7 +60,7 @@ class MgImageCreator(object):
     with the provided cards.
     '''
 
-    def __init__(self, dpi, wh, xy):
+    def __init__(self, dpi, wh, xy, logger=None):
         self.dpi = dpi
         self.wh = wh
         self.xy = xy
@@ -76,6 +73,9 @@ class MgImageCreator(object):
         # Holds a list of two element tupples: the name of invalid cards and the
         # reason.
         self.invalid_names = []
+
+        # Store logger is specified (None otherwise)
+        self.logger = logger
 
     def paste(self, image):
         '''Pastes the image into the next slot on the canvas.
@@ -148,16 +148,16 @@ class MgImageCreator(object):
             else:
                 self.pasteMulti(image, number, directory, file_name)
                 log_msg = logCardName(number_name)
-                logger.info(
-                    MG_LOGGER_CONST['good_paste'] %
-                    (number_name[1], log_msg)
+                self.logInfo(
+                    MG_LOGGER_CONST['good_paste'] % (number_name[1], log_msg)
                 )
 
         if (self.pic_count > 0):
             self.save(directory, file_name)
 
-        logger.info(MG_LOGGER_CONST['final_msg'] %
-                    (self.total_pic, self.page_count))
+        self.logInfo(
+            MG_LOGGER_CONST['final_msg'] % (self.total_pic, self.page_count)
+        )
 
         return self.reset()
 
@@ -182,6 +182,10 @@ class MgImageCreator(object):
             self.invalid_names.append(error_msg)
 
         self.startNextPage()
+
+    def logInfo(self, message):
+        if self.logger:
+            self.logger.info(message)
 
     def createFromWeb(self, name_array, directory, file_name):
         '''Wrapper function to run image creation from web-based image files.'''
