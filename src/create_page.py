@@ -14,7 +14,7 @@ except ImportError:
 from .get_image import getMgImage, getLocalMgImage, validateImage
 from .constants import MgException
 
-from .logger_dict import MG_LOGGER_CONST
+from .logger_dict import MG_LOGGER_CONST, logCardName
 
 logger = logging.getLogger(MG_LOGGER_CONST['base_name'])
 
@@ -147,6 +147,11 @@ class MgImageCreator(object):
                 self.invalid_names.append((error_msg, str(e)))
             else:
                 self.pasteMulti(image, number, directory, file_name)
+                log_msg = logCardName(number_name)
+                logger.info(
+                    MG_LOGGER_CONST['good_paste'] %
+                    (number_name[1], log_msg)
+                )
 
         if (self.pic_count > 0):
             self.save(directory, file_name)
