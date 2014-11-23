@@ -23,7 +23,7 @@ def parseLine(line):
     match = re.match(r'^\s*(?:(SB:)\s+)?(\d+)\s+(?:\[(\w*)\]\s+)?(\S.*)$', line)
 
     if match is None:
-        raise MgException(MG_LOGGER_CONST['bad_parse'] % line)
+        raise MgException(MG_LOGGER_CONST['bad_parse'] % line.strip())
 
     # Tupple is immutable, so conversion into a list
     parsed = list(match.groups())
@@ -54,6 +54,7 @@ def parseFile(file_path):
                 valid_list.append(parseLine(line))
             except MgException as e:
                 invalid_lines.append((line, str(e)))
+                logger.error(str(e))
 
     return (valid_list, invalid_lines)
 
@@ -83,16 +84,15 @@ def createFromWebOrLocal(parsed_input):
     '''Takes parsed input from arg_parser and shunts it to function'''
     logger.info(MG_LOGGER_CONST['start_prog'])
 
-    file_name = parsed_input['file_name']
+    full_path = parsed_input['file_name']
+    file_path, file_name = splitFile(full_path)
+    logger.info(MG_LOGGER_CONST['save_loc'] % file_path)
 
     try:
-        user_input, invalid_lines = parseFile(file_name)
+        user_input, invalid_lines = parseFile(full_path)
     except IOError:
         sys.stderr.write('Card file does not exist')
         sys.exit()
-
-    file_path, file_name = splitFile(file_name)
-    logger.info(MG_LOGGER_CONST['save_loc'] % file_path)
 
     creator = MgImageCreator(
         parsed_input['dpi'],

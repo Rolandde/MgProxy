@@ -67,17 +67,16 @@ class LoggerTests(unittest.TestCase):
         self.log_capt.check(
             self.log_start(),
             self.log_save(file_path),
-            self.log_card_paste((None, 2, None, 'Swamp')),
-            self.log_card_paste((None, 2, 'M10', 'Forest')),
             self.log_bad_parse('Forest'),
             self.log_bad_parse('[M10] Forest'),
             self.log_bad_parse('SB: Forest'),
             self.log_bad_parse('A Forest'),
             self.log_bad_parse('2'),
             self.log_bad_parse('SB: 2'),
-            self.log_bad_parse('2 [M10]'),
             self.log_bad_parse('2Forest'),
             self.log_bad_parse('SB: 1[M10] Forest'),
+            self.log_card_paste((None, 2, None, 'Swamp')),
+            self.log_card_paste((None, 2, 'M10', 'Forest')),
             self.log_total(4, 1)
         )
 

@@ -7,6 +7,5 @@ SB: Forest
 A Forest
 2
 SB: 2
-2 [M10]
 2Forest
 SB: 1[M10] Forest
