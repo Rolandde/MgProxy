@@ -44,7 +44,7 @@ def parseFile(file_path):
     '''Parses a MWS file, ignoring comment and empty lines. Returns tupple with
     two elements: a list of valid and invalid lines.'''
     valid_list = []
-    invalid_lines = []
+    invalid_lines = 0
     f = open(file_path, 'rU')
 
     for line in f:
@@ -53,7 +53,7 @@ def parseFile(file_path):
             try:
                 valid_list.append(parseLine(line))
             except MgException as e:
-                invalid_lines.append((line, str(e)))
+                invalid_lines += 1
                 logger.error(str(e))
 
     return (valid_list, invalid_lines)
@@ -114,7 +114,7 @@ def createFromWebOrLocal(parsed_input):
             file_name
         )
 
-    errorLog(invalid_lines + invalid_cards)
+    errorLog(invalid_cards)
 
 
 def main(args=None):
