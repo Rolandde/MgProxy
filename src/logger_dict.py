@@ -40,7 +40,10 @@ MG_LOGGER_CONST = {
     'good_paste': '%d repeat(s) of %s successfully added.',
 
     # Failed to parse input line
-    'bad_parse': 'Could not parse MWS line: %s'
+    'bad_parse': 'Could not parse MWS line: %s',
+
+    # Cannot open input file
+    'bad_input': 'Could not open input file: %s'
 }
 
 

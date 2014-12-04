@@ -90,7 +90,7 @@ def createFromWebOrLocal(parsed_input):
     try:
         f = open(full_path, 'rU')
     except IOError:
-        logger.critical('Could not open input file!')
+        logger.critical(MG_LOGGER_CONST['bad_input'] % full_path)
         sys.exit()
 
     file_path, file_name = splitFile(full_path)
