@@ -40,12 +40,14 @@ def parseLine(line):
     return parsed
 
 
-def parseFile(file_path):
-    '''Parses a MWS file, ignoring comment and empty lines. Returns tupple with
-    two elements: a list of valid and invalid lines.'''
+def parseFile(f):
+    '''Takes MWS file object and arses it.
+
+    Returns tupple with two elements: a list of valid lines and
+    count of invalid lines
+    '''
     valid_list = []
     invalid_lines = 0
-    f = open(file_path, 'rU')
 
     for line in f:
         # Ignore lines that are whitespace only or start with //
@@ -85,14 +87,16 @@ def createFromWebOrLocal(parsed_input):
     logger.info(MG_LOGGER_CONST['start_prog'])
 
     full_path = parsed_input['file_name']
+    try:
+        f = open(full_path, 'rU')
+    except IOError:
+        logger.critical('Could not open input file!')
+        sys.exit()
+
     file_path, file_name = splitFile(full_path)
     logger.info(MG_LOGGER_CONST['save_loc'] % file_path)
 
-    try:
-        user_input, invalid_lines = parseFile(full_path)
-    except IOError:
-        sys.stderr.write('Card file does not exist')
-        sys.exit()
+    user_input, invalid_lines = parseFile(f)
 
     creator = MgImageCreator(
         parsed_input['dpi'],
