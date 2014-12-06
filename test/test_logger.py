@@ -80,6 +80,16 @@ class LoggerTests(unittest.TestCase):
             self.log_total(4, 1)
         )
 
+    def test_bad_file(self):
+        '''Test logging when input file cannot be accessed'''
+        file_path = '/file/does/not/exist'
+
+        main([file_path])
+        self.log_capt.check(
+            self.log_start(),
+            self.log_bad_file(file_path)
+        )
+
     def helper_file_path(self, file_name):
         '''Return the relative file path from the module root'''
         base_path = 'test/files'
@@ -122,6 +132,12 @@ class LoggerTests(unittest.TestCase):
             MG_LOGGER_CONST['bad_parse'] % line
         )
 
+    def log_bad_file(self, file_path):
+        '''Error log when input file does not exist or could not be accessed'''
+        return (
+            MG_LOGGER_CONST['base_name'], 'CRITICAL',
+            MG_LOGGER_CONST['bad_input'] % file_path
+        )
 
 if __name__ == '__main__':
     unittest.main()
