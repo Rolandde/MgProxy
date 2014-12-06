@@ -91,34 +91,33 @@ def createFromWebOrLocal(parsed_input):
         f = open(full_path, 'rU')
     except IOError:
         logger.critical(MG_LOGGER_CONST['bad_input'] % full_path)
-        sys.exit()
-
-    file_path, file_name = splitFile(full_path)
-    logger.info(MG_LOGGER_CONST['save_loc'] % file_path)
-
-    user_input, invalid_lines = parseFile(f)
-
-    creator = MgImageCreator(
-        parsed_input['dpi'],
-        parsed_input['card_dimensions'],
-        parsed_input['card_number'],
-        logger
-    )
-
-    if parsed_input['local_file']:
-        invalid_cards = creator.createFromLocal(
-            user_input,
-            file_path,
-            file_name
-        )
     else:
-        invalid_cards = creator.createFromWeb(
-            user_input,
-            file_path,
-            file_name
+        file_path, file_name = splitFile(full_path)
+        logger.info(MG_LOGGER_CONST['save_loc'] % file_path)
+
+        user_input, invalid_lines = parseFile(f)
+
+        creator = MgImageCreator(
+            parsed_input['dpi'],
+            parsed_input['card_dimensions'],
+            parsed_input['card_number'],
+            logger
         )
 
-    errorLog(invalid_cards)
+        if parsed_input['local_file']:
+            invalid_cards = creator.createFromLocal(
+                user_input,
+                file_path,
+                file_name
+            )
+        else:
+            invalid_cards = creator.createFromWeb(
+                user_input,
+                file_path,
+                file_name
+            )
+
+        errorLog(invalid_cards)
 
 
 def main(args=None):
