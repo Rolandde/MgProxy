@@ -16,6 +16,25 @@ except ImportError:
     sys.exit()
 
 
+def getGenericData(address, content_type):
+    response = urllib.urlopen(address)
+
+    if response.getcode() != 200:
+        raise MgException(
+            'Error code: ' + str(response.getcode()) + ' - ' + address
+        )
+
+    response_content_type = response.info()['Content-Type']
+    if response_content_type != content_type:
+        raise MgException(
+            'Expected content_type %s. Received %s instead from %s' %
+            (content_type, response_content_type, address)
+        )
+
+    file_size = int(response.info()['Content-Length'])
+    return response.read(file_size)
+
+
 def createAddress(card_name, set_name=None):
     '''Creates a URL from a card name and an optional set.
     Correctly escapes characters.'''
@@ -44,22 +63,7 @@ def getMgImage(card_name, set_name=None):
     Note that this function does not check if the downloaded image is a
     valid image file.'''
     address = createAddress(card_name, set_name)
-    response = urllib.urlopen(address)
-
-    if response.getcode() != 200:
-        raise MgException(
-            'Card URL does not exist. Error code: ' + str(response.getcode()) +
-            ': ' + address)
-
-    if response.info()['Content-Type'] != 'image/jpeg':
-        raise MgException(
-            'Expected image file jpeg, instead received: ' +
-            response.info()['Content-Type'] +
-            ': ' +
-            address)
-
-    image_size = int(response.info()['Content-Length'])
-    image_stream = response.read(image_size)
+    image_stream = getGenericData(address, 'image/jpeg')
     image_stream = StringIO(image_stream)
 
     return Image.open(image_stream)
