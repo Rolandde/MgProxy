@@ -4,7 +4,8 @@ import urllib
 from urlparse import urljoin
 import json
 
-from .constants import MgException, BASE_URL_JSON, JSON_EXT
+from .constants import BASE_URL_JSON, JSON_EXT
+from .get_image import getGenericData
 
 
 def createSetAddress(set_code):
@@ -17,23 +18,7 @@ def createSetAddress(set_code):
 def getSetJson(set_code):
     '''Downloads the JSON data for the given set and returns it as a dict'''
     address = createSetAddress(set_code)
-    response = urllib.urlopen(address)
-
-    if response.getcode() != 200:
-        raise MgException(
-            'Set URL does not exist. Error code: ' + str(response.getcode()) +
-            ': ' + address)
-
-    if response.info()['Content-Type'] != 'application/json':
-        raise MgException(
-            'Expected json file, instead received: ' +
-            response.info()['Content-Type'] +
-            ': ' +
-            address)
-
-    json_size = int(response.info()['Content-Length'])
-    json_stream = response.read(json_size)
-
+    json_stream = getGenericData(address, 'application/json')
     return json.loads(json_stream)
 
 
