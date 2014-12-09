@@ -1,4 +1,5 @@
 import urllib
+import urllib2
 import sys
 import os
 
@@ -17,21 +18,21 @@ except ImportError:
 
 
 def getGenericData(address, content_type):
-    response = urllib.urlopen(address)
+    response = urllib2.urlopen(address)
 
     if response.getcode() != 200:
         raise MgException(
             'Error code: ' + str(response.getcode()) + ' - ' + address
         )
 
-    response_content_type = response.info()['Content-Type']
+    response_content_type = response.info().getheader('Content-Type')
     if response_content_type != content_type:
         raise MgException(
             'Expected content_type %s. Received %s instead from %s' %
             (content_type, response_content_type, address)
         )
 
-    file_size = int(response.info()['Content-Length'])
+    file_size = int(response.info().getheader('Content-Length'))
     return response.read(file_size)
 
 
