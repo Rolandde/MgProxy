@@ -8,6 +8,10 @@ TIMEOUT = 0.5  # Timeout (sec) for urllib2.geturl()
 
 
 class MgException(Exception):
-
     '''Base Exception class used for this program'''
+    pass
+
+
+class TimeoutException(MgException):
+    '''Thrown if the website cannot be reached.'''
     pass
