@@ -43,7 +43,10 @@ MG_LOGGER_CONST = {
     'bad_parse': 'Could not parse MWS line: %s',
 
     # Cannot open input file
-    'bad_input': 'Could not open input file: %s'
+    'bad_input': 'Could not open input file: %s',
+
+    # Timeout error getting a card from the network
+    'timeout_error': 'Could not retrive %s from %s due to timeout (%s)'
 }
 
 

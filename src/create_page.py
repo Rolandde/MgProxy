@@ -55,9 +55,9 @@ class MgImageCreator(object):
     '''Place images onto an object in a regular and cuttable manner.
 
     An instance of this object is given the dpi, the width/hight of the cards,
-    and the max number of cards in the xy directions. Once an object of this
-    class is initialized, the create functions can be called to create jpgs
-    with the provided cards.
+    the max number of cards in the xy directions, and an optional logger. Once
+    an object of this class is initialized, the create functions can be called
+    to create jpgs with the provided cards.
     '''
 
     def __init__(self, dpi, wh, xy, logger=None):

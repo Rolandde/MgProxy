@@ -139,5 +139,12 @@ class LoggerTests(unittest.TestCase):
             MG_LOGGER_CONST['bad_input'] % file_path
         )
 
+    def log_timeout(self, card, address, error_msg):
+        '''Error log when website access times out'''
+        return (
+            MG_LOGGER_CONST['base_name'], 'ERROR',
+            MG_LOGGER_CONST['timeout_error'] % (card, address, error_msg)
+        )
+
 if __name__ == '__main__':
     unittest.main()
