@@ -5,6 +5,8 @@ import os.path
 
 from src.logger_dict import MG_LOGGER, MG_LOGGER_CONST, logCardName
 from src.mg_proxy_creator import main, splitFile
+from src.get_image import createAddress
+import src.constants
 
 # If testfixtures in not available, skip these tests
 SKIP_TEST = False
@@ -12,6 +14,10 @@ try:
     from testfixtures import LogCapture
 except ImportError:
     SKIP_TEST = True
+
+# I will be changing this constant to emulate timeout (test_timeout)
+# This variable will be used to reset the address
+ORIGINAL_BASE_URL = src.constants.BASE_URL
 
 
 @unittest.skipIf(SKIP_TEST, 'Testfixtures module not found')
@@ -25,8 +31,12 @@ class LoggerTests(unittest.TestCase):
         logging.config.dictConfig(MG_LOGGER)
 
     def setUp(self):
-        '''For each test a new LogCapture instance is called'''
+        # For each test a new LogCapture instance is called
         self.log_capt = LogCapture(MG_LOGGER_CONST['base_name'])
+
+        # To emulate a timeout, I'll change the address (add port 81)
+        # This returns it to a default in case the test somehow fails
+        src.constants.BASE_URL = ORIGINAL_BASE_URL
 
     def tearDown(self):
         '''Simply uninstalls the log capture instance (warning otherwise)'''
@@ -90,6 +100,28 @@ class LoggerTests(unittest.TestCase):
             self.log_bad_file(file_path)
         )
 
+    def test_timeout(self):
+        '''Test that a timeout is correctly logged'''
+        file_path = self.helper_file_path('good_input.txt')
+
+        # Setting the port to 81 will cause a timeout
+        src.constants.BASE_URL = 'http://mtgimage.com:81/'
+
+        main([file_path])
+        self.log_capt.check(
+            self.log_start(),
+            self.log_save(file_path),
+            self.log_timeout(
+                (None, 2, None, 'Swamp'),
+                createAddress('Swamp', None)
+            ),
+            self.log_timeout(
+                (None, 2, 'M10', 'Swamp'),
+                createAddress('Swamp', 'M10')
+            ),
+            self.log_total(0, 0)
+        )
+
     def helper_file_path(self, file_name):
         '''Return the relative file path from the module root'''
         base_path = 'test/files'
@@ -139,11 +171,12 @@ class LoggerTests(unittest.TestCase):
             MG_LOGGER_CONST['bad_input'] % file_path
         )
 
-    def log_timeout(self, card, address, error_msg):
+    def log_timeout(self, card_input, address):
         '''Error log when website access times out'''
+        card_name = logCardName(card_input)
         return (
             MG_LOGGER_CONST['base_name'], 'ERROR',
-            MG_LOGGER_CONST['timeout_error'] % (card, address, error_msg)
+            MG_LOGGER_CONST['timeout_error'] % (card_name, address)
         )
 
 if __name__ == '__main__':

@@ -46,7 +46,10 @@ MG_LOGGER_CONST = {
     'bad_input': 'Could not open input file: %s',
 
     # Timeout error getting a card from the network
-    'timeout_error': 'Could not retrive %s from %s due to timeout (%s)'
+    'timeout_error': (
+        'Could not retrive %s from %s due to timeout. ' +
+        'Website or internet connection is down'
+    )
 }
 
 
