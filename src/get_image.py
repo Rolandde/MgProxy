@@ -4,8 +4,11 @@ import sys
 import os
 
 from StringIO import StringIO
-from .constants import MgException, TimeoutException, BASE_URL, TIMEOUT
+from .constants import MgException, TimeoutException, TIMEOUT
 from urlparse import urljoin
+
+# See create address for reason for duplicate import
+import constants
 
 try:
     from PIL import Image
@@ -42,7 +45,10 @@ def getGenericData(address, content_type, timeout=TIMEOUT):
 def createAddress(card_name, set_name=None):
     '''Creates a URL from a card name and an optional set.
     Correctly escapes characters.'''
-    return_url = BASE_URL
+
+    # When I want to test timeout, I need to change BASE_URL (see test_logging)
+    # Therefore, I cannot use from constants import BASE_URL
+    return_url = constants.BASE_URL
 
     if set_name:
         if len(set_name) < 4:
