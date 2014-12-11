@@ -3,10 +3,10 @@ import os.path
 import sys
 import logging
 
-from .create_page import MgImageCreator
-from .constants import MgException
-from .argv_input import arg_parser
-from .logger_dict import MG_LOGGER_CONST
+from src.create_page import MgImageCreator
+from src.constants import MgException
+from src.argv_input import arg_parser
+from src.logger_dict import MG_LOGGER_CONST
 
 logger = logging.getLogger(MG_LOGGER_CONST['base_name'])
 

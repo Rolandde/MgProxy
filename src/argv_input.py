@@ -1,5 +1,5 @@
 import argparse
-from .constants import DPI, WIDTH, HIGHT, PAGE_X, PAGE_Y
+from src.constants import DPI, WIDTH, HIGHT, PAGE_X, PAGE_Y
 
 arg_parser = argparse.ArgumentParser(
     description=('Create printer friendly constructed decks or random ' +

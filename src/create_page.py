@@ -10,10 +10,10 @@ except ImportError:
     )
     sys.exit()
 
-from .get_image import getMgImage, getLocalMgImage, validateImage
-from .constants import MgException
+from src.get_image import getMgImage, getLocalMgImage, validateImage
+from src.constants import MgException
 
-from .logger_dict import MG_LOGGER_CONST, logCardName
+from src.logger_dict import MG_LOGGER_CONST, logCardName
 
 
 def createCanvas(dpi, wh, xy):

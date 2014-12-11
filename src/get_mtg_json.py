@@ -4,8 +4,8 @@ import urllib
 from urlparse import urljoin
 import json
 
-from .constants import BASE_URL_JSON, JSON_EXT
-from .get_image import getGenericData
+from src.constants import BASE_URL_JSON, JSON_EXT
+from src.get_image import getGenericData
 
 
 def createSetAddress(set_code):

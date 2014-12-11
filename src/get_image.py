@@ -4,11 +4,11 @@ import sys
 import os
 
 from StringIO import StringIO
-from .constants import MgException, TimeoutException, TIMEOUT
+from src.constants import MgException, TimeoutException, TIMEOUT
 from urlparse import urljoin
 
 # See create address for reason for duplicate import
-import constants
+import src.constants
 
 try:
     from PIL import Image
@@ -48,7 +48,7 @@ def createAddress(card_name, set_name=None):
 
     # When I want to test timeout, I need to change BASE_URL (see test_logging)
     # Therefore, I cannot use from constants import BASE_URL
-    return_url = constants.BASE_URL
+    return_url = src.constants.BASE_URL
 
     if set_name:
         if len(set_name) < 4:
