@@ -17,9 +17,9 @@ except ImportError:
     sys.exit()
 
 
-def getGenericData(address, content_type):
+def getGenericData(address, content_type, timeout=TIMEOUT):
     try:
-        response = urllib2.urlopen(address, timeout=TIMEOUT)
+        response = urllib2.urlopen(address, timeout)
     except urllib2.URLError as e:
         raise TimeoutException(address, str(e))
 
