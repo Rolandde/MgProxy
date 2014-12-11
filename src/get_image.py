@@ -4,7 +4,7 @@ import sys
 import os
 
 from StringIO import StringIO
-from .constants import MgException, BASE_URL, TIMEOUT
+from .constants import MgException, TimeoutException, BASE_URL, TIMEOUT
 from urlparse import urljoin
 
 try:
@@ -18,7 +18,10 @@ except ImportError:
 
 
 def getGenericData(address, content_type):
-    response = urllib2.urlopen(address, timeout=TIMEOUT)
+    try:
+        response = urllib2.urlopen(address, timeout=TIMEOUT)
+    except urllib2.URLError as e:
+        raise TimeoutException(address, str(e))
 
     if response.getcode() != 200:
         raise MgException(
