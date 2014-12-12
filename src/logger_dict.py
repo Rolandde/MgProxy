@@ -49,7 +49,13 @@ MG_LOGGER_CONST = {
     'timeout_error': (
         'Could not retrive %s from %s due to timeout. ' +
         'Website or internet connection is down'
-    )
+    ),
+
+    # Error message for HTML code when it is not 200
+    'html_error': 'Unexpected HTML status code %d for %s',
+
+    # Error message for unexpected content type of HTML response
+    'ct_error': 'Expected content_type %s. Received %s instead from %s'
 }
 
 

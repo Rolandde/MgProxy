@@ -5,6 +5,7 @@ import os
 
 from StringIO import StringIO
 from src.constants import MgException, TimeoutException, TIMEOUT
+from src.logger_dict import MG_LOGGER_CONST
 from urlparse import urljoin
 
 # See create address for reason for duplicate import
@@ -28,13 +29,13 @@ def getGenericData(address, content_type, timeout=TIMEOUT):
 
     if response.getcode() != 200:
         raise MgException(
-            'Error code: ' + str(response.getcode()) + ' - ' + address
+            MG_LOGGER_CONST['html_error'] % (response.getcode(), address)
         )
 
     response_content_type = response.info().getheader('Content-Type')
     if response_content_type != content_type:
         raise MgException(
-            'Expected content_type %s. Received %s instead from %s' %
+            MG_LOGGER_CONST['ct_error'] %
             (content_type, response_content_type, address)
         )
 
