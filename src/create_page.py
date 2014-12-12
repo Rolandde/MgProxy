@@ -11,7 +11,7 @@ except ImportError:
     sys.exit()
 
 from src.get_image import getMgImage, getLocalMgImage, validateImage
-from src.constants import MgException
+from src.constants import MgException, TimeoutException
 
 from src.logger_dict import MG_LOGGER_CONST, logCardName
 
@@ -141,6 +141,11 @@ class MgImageCreator(object):
                 else:
                     image = getMgImage(card_name, set_name)
                 validateImage(image)
+            except TimeoutException as e:
+                self.logger.error(
+                    MG_LOGGER_CONST['timeout_error'] %
+                    (logCardName(number_name), str(e))
+                )
             except MgException as e:
                 error_msg = set_name + '/' + \
                     card_name if set_name else card_name

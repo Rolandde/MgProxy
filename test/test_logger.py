@@ -116,8 +116,8 @@ class LoggerTests(unittest.TestCase):
                 createAddress('Swamp', None)
             ),
             self.log_timeout(
-                (None, 2, 'M10', 'Swamp'),
-                createAddress('Swamp', 'M10')
+                (None, 2, 'M10', 'Forest'),
+                createAddress('Forest', 'M10')
             ),
             self.log_total(0, 0)
         )
