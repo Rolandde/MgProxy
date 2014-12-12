@@ -23,8 +23,8 @@ except ImportError:
 def getGenericData(address, content_type, timeout=TIMEOUT):
     try:
         response = urllib2.urlopen(address, timeout=timeout)
-    except urllib2.URLError as e:
-        raise TimeoutException(address, str(e))
+    except urllib2.URLError:
+        raise TimeoutException(address)
 
     if response.getcode() != 200:
         raise MgException(
