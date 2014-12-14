@@ -64,7 +64,8 @@ def createAddress(card_name, set_name=None):
     else:
         return_url = urljoin(return_url, 'card/')
 
-    hq_card_name = urllib.quote(card_name + '.hq.jpg')
+    # CARD_EXT can be changed (important for test_logging)
+    hq_card_name = urllib.quote(card_name + src.constants.CARD_EXT)
     return urljoin(return_url, hq_card_name)
 
 
