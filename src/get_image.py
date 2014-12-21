@@ -5,6 +5,7 @@ import os
 
 from StringIO import StringIO
 from src.constants import MgException, TimeoutException, TIMEOUT
+from src.constants import BASE_URL
 from src.logger_dict import MG_LOGGER_CONST
 from urlparse import urljoin
 
@@ -43,13 +44,9 @@ def getGenericData(address, content_type, timeout=TIMEOUT):
     return response.read(file_size)
 
 
-def createAddress(card_name, set_name=None):
+def createAddress(card_name, set_name=None, return_url=BASE_URL):
     '''Creates a URL from a card name and an optional set.
     Correctly escapes characters.'''
-
-    # When I want to test timeout, I need to change BASE_URL (see test_logging)
-    # Therefore, I cannot use from constants import BASE_URL
-    return_url = src.constants.BASE_URL
 
     if set_name:
         if len(set_name) < 4:
