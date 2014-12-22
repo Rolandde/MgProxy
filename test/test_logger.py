@@ -34,8 +34,15 @@ class LoggerTests(unittest.TestCase):
         del ADDRESS_ERROR[:]
 
     def tearDown(self):
-        '''Simply uninstalls the log capture instance (warning otherwise)'''
+        # Simply uninstalls the log capture instance (warning otherwise)
         self.log_capt.uninstall()
+
+        # Remove the created jpeg files from the files folder
+        base_path = 'test/files'
+
+        filelist = [f for f in os.listdir(base_path) if f.endswith(".jpg")]
+        for f in filelist:
+            os.remove(os.path.join(base_path, f))
 
     def test_empty_file(self):
         '''Tests the log output for an empty file'''
