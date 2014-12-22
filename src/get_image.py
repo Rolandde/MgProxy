@@ -22,6 +22,16 @@ except ImportError:
     sys.exit()
 
 
+'''This is a module specific constant used for testing purposes.
+
+It can be passed specific keywords to cause different addresses to be returned
+by createAddress function (through the AddressErrorDecorator. See the
+decorator for specific strings that can be supplied. It is a list as I want
+a mutable object that can be easily changed in the test module.
+'''
+ADDRESS_ERROR = []
+
+
 def getGenericData(address, content_type, timeout=TIMEOUT):
     try:
         response = urllib2.urlopen(address, timeout=timeout)
@@ -44,6 +54,30 @@ def getGenericData(address, content_type, timeout=TIMEOUT):
     return response.read(file_size)
 
 
+class AddressErrorDecorator(object):
+
+    '''Decorates the createAddress function and causes errors for testing.
+
+    It takes the module constant ADDRESS_ERROR and if the list has one element
+    this decorator returns an address that will cause a loggable error.
+    '''
+
+    def __init__(self, f):
+        '''If there are no decorator arguements, f is the decorated function'''
+        self.f = f
+
+    def __call__(self, card_name, set_name=None, *args, **kwargs):
+        '''Here we decorate the function to return invalid addresses'''
+        if ADDRESS_ERROR:
+            if ADDRESS_ERROR[0] == 'timeout':
+                # Cause a timeout address by adding port 81
+                to_add = 'http://mtgimage.com:81/'
+                return self.f(card_name, set_name, to_add)
+        else:
+            return self.f(card_name, set_name)
+
+
+@AddressErrorDecorator
 def createAddress(card_name, set_name=None, return_url=BASE_URL):
     '''Creates a URL from a card name and an optional set.
     Correctly escapes characters.'''
