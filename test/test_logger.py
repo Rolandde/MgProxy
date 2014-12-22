@@ -43,11 +43,8 @@ class LoggerTests(unittest.TestCase):
 
         # sys.argv always returns a list, so I need to supply a list
         main([file_path])
-        self.log_capt.check(
-            self.log_start(),
-            self.log_save(file_path),
-            self.log_total(0, 0)
-        )
+        log_list = self.helper_log_template(file_path, 0, 0)
+        self.log_capt.check(*log_list)
 
     def test_correct_file(self):
         '''Tests syntatically correct files where all cards exist'''
@@ -55,13 +52,13 @@ class LoggerTests(unittest.TestCase):
 
         # sys.argv always returns a list, so I need to supply a list
         main([file_path])
-        self.log_capt.check(
-            self.log_start(),
-            self.log_save(file_path),
+        log_list = self.helper_log_template(
+            file_path, 4, 1,
             self.log_card_paste((None, 2, None, 'Swamp')),
-            self.log_card_paste((None, 2, 'M10', 'Forest')),
-            self.log_total(4, 1)
+            self.log_card_paste((None, 2, 'M10', 'Forest'))
         )
+
+        self.log_capt.check(*log_list)
 
     def test_bad_parse(self):
         '''Test various versions of bad parse'''
@@ -69,9 +66,8 @@ class LoggerTests(unittest.TestCase):
 
         # sys.argv always returns a list, so I need to supply a list
         main([file_path])
-        self.log_capt.check(
-            self.log_start(),
-            self.log_save(file_path),
+        log_list = self.helper_log_template(
+            file_path, 4, 1,
             self.log_bad_parse('Forest'),
             self.log_bad_parse('[M10] Forest'),
             self.log_bad_parse('SB: Forest'),
@@ -81,9 +77,10 @@ class LoggerTests(unittest.TestCase):
             self.log_bad_parse('2Forest'),
             self.log_bad_parse('SB: 1[M10] Forest'),
             self.log_card_paste((None, 2, None, 'Swamp')),
-            self.log_card_paste((None, 2, 'M10', 'Forest')),
-            self.log_total(4, 1)
+            self.log_card_paste((None, 2, 'M10', 'Forest'))
         )
+
+        self.log_capt.check(*log_list)
 
     def test_bad_file(self):
         '''Test logging when input file cannot be accessed'''
@@ -102,11 +99,10 @@ class LoggerTests(unittest.TestCase):
         ADDRESS_ERROR.append('timeout')
 
         file_path = self.helper_file_path('good_input.txt')
-        main([file_path])
 
-        self.log_capt.check(
-            self.log_start(),
-            self.log_save(file_path),
+        main([file_path])
+        log_list = self.helper_log_template(
+            file_path, 0, 0,
             self.log_timeout(
                 (None, 2, None, 'Swamp'),
                 createAddress('Swamp', None)
@@ -114,14 +110,29 @@ class LoggerTests(unittest.TestCase):
             self.log_timeout(
                 (None, 2, 'M10', 'Forest'),
                 createAddress('Forest', 'M10')
-            ),
-            self.log_total(0, 0)
+            )
         )
+
+        self.log_capt.check(*log_list)
 
     def helper_file_path(self, file_name):
         '''Return the relative file path from the module root'''
         base_path = 'test/files'
         return os.path.join(base_path, file_name)
+
+    def helper_log_template(self, file_path, cards, pages, *args):
+        '''Creates the boiler blate logging calls'''
+        log_list = [self.log_start()]
+
+        if file_path:
+            log_list.append(self.log_save(file_path))
+
+        if args:
+            log_list = log_list + list(args)
+
+        log_list.append(self.log_total(cards, pages))
+
+        return log_list
 
     def log_start(self):
         '''Returns program start log message tuple for testing purposes'''
