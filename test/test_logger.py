@@ -6,7 +6,7 @@ import os.path
 from src.logger_dict import MG_LOGGER, MG_LOGGER_CONST, logCardName
 from src.mg_proxy_creator import main, splitFile
 from src.get_image import createAddress
-import src.constants
+from src.get_image import ADDRESS_ERROR
 
 # If testfixtures in not available, skip these tests
 SKIP_TEST = False
@@ -14,10 +14,6 @@ try:
     from testfixtures import LogCapture
 except ImportError:
     SKIP_TEST = True
-
-# I will be changing this constant to emulate timeout (test_timeout)
-# This variable will be used to reset the address
-ORIGINAL_BASE_URL = src.constants.BASE_URL
 
 
 @unittest.skipIf(SKIP_TEST, 'Testfixtures module not found')
@@ -34,9 +30,8 @@ class LoggerTests(unittest.TestCase):
         # For each test a new LogCapture instance is called
         self.log_capt = LogCapture(MG_LOGGER_CONST['base_name'])
 
-        # To emulate a timeout, I'll change the address (add port 81)
-        # This returns it to a default in case the test somehow fails
-        src.constants.BASE_URL = ORIGINAL_BASE_URL
+        # Empties the list (do not want to assign a new empty list)
+        del ADDRESS_ERROR[:]
 
     def tearDown(self):
         '''Simply uninstalls the log capture instance (warning otherwise)'''
@@ -102,12 +97,13 @@ class LoggerTests(unittest.TestCase):
 
     def test_timeout(self):
         '''Test that a timeout is correctly logged'''
+
+        # Set timeout flag (will be reset in setUp)
+        ADDRESS_ERROR.append('timeout')
+
         file_path = self.helper_file_path('good_input.txt')
-
-        # Setting the port to 81 will cause a timeout
-        src.constants.BASE_URL = 'http://mtgimage.com:81/'
-
         main([file_path])
+
         self.log_capt.check(
             self.log_start(),
             self.log_save(file_path),
