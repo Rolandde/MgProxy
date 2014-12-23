@@ -99,7 +99,7 @@ class LoggerTests(unittest.TestCase):
             self.log_bad_file(file_path)
         )
 
-    def test_timeout(self):
+    def test_network_error(self):
         '''Test that a timeout is correctly logged'''
 
         # Set timeout flag (will be reset in setUp)
@@ -110,11 +110,11 @@ class LoggerTests(unittest.TestCase):
         main([file_path])
         log_list = self.helper_log_template(
             file_path, 0, 0,
-            self.log_timeout(
+            self.log_network_error(
                 (None, 2, None, 'Swamp'),
                 createAddress('Swamp', None)
             ),
-            self.log_timeout(
+            self.log_network_error(
                 (None, 2, 'M10', 'Forest'),
                 createAddress('Forest', 'M10')
             )
@@ -199,12 +199,18 @@ class LoggerTests(unittest.TestCase):
             MG_LOGGER_CONST['bad_input'] % file_path
         )
 
-    def log_timeout(self, card_input, address):
+    def log_network_error(self, card_input, address):
         '''Error log when website access times out'''
         card_name = logCardName(card_input)
         return (
             MG_LOGGER_CONST['base_name'], 'ERROR',
-            MG_LOGGER_CONST['timeout_error'] % (card_name, address)
+            MG_LOGGER_CONST['card_error'] % (
+                card_name,
+                MG_LOGGER_CONST['network_error'] % (
+                    address,
+                    '[Errno 111] Connection refused'
+                )
+            )
         )
 
     def log_card_404(self, card_input):
