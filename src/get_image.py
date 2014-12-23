@@ -5,7 +5,7 @@ import os
 import functools
 
 from StringIO import StringIO
-from src.constants import MgException, TimeoutException, TIMEOUT
+from src.constants import MgException, MgNetworkException, TIMEOUT
 from src.constants import BASE_URL
 from src.logger_dict import MG_LOGGER_CONST
 from urlparse import urljoin
@@ -34,19 +34,25 @@ ADDRESS_ERROR = []
 
 
 def getGenericData(address, content_type, timeout=TIMEOUT):
+    '''Get data of content_type from address.
+
+    Raises MgNetworkException is data cannot be downloaded or if the
+    content_type does not match.
+    '''
     try:
         response = urllib2.urlopen(address, timeout=timeout)
-    except urllib2.URLError:
-        raise TimeoutException(address)
-
-    if response.getcode() != 200:
-        raise MgException(
-            MG_LOGGER_CONST['html_error'] % (response.getcode(), address)
+    except urllib2.HTTPError as e:
+        raise MgNetworkException(
+            MG_LOGGER_CONST['html_error'] % (e.code, address)
+        )
+    except urllib2.URLError as e:
+        raise MgNetworkException(
+            MG_LOGGER_CONST['network_error'] % (address, e.reason)
         )
 
     response_content_type = response.info().getheader('Content-Type')
     if response_content_type != content_type:
-        raise MgException(
+        raise MgNetworkException(
             MG_LOGGER_CONST['ct_error'] %
             (content_type, response_content_type, address)
         )

@@ -11,7 +11,7 @@ except ImportError:
     sys.exit()
 
 from src.get_image import getMgImage, getLocalMgImage, validateImage
-from src.constants import MgException, TimeoutException
+from src.constants import MgNetworkException
 
 from src.logger_dict import MG_LOGGER_CONST, logCardName
 
@@ -141,15 +141,13 @@ class MgImageCreator(object):
                 else:
                     image = getMgImage(card_name, set_name)
                 validateImage(image)
-            except TimeoutException as e:
+            except MgNetworkException as reason:
                 self.logger.error(
-                    MG_LOGGER_CONST['timeout_error'] %
-                    (logCardName(number_name), str(e))
+                    MG_LOGGER_CONST['card_error'] % (
+                        logCardName(number_name),
+                        reason
+                    )
                 )
-            except MgException as e:
-                error_msg = set_name + '/' + \
-                    card_name if set_name else card_name
-                self.invalid_names.append((error_msg, str(e)))
             else:
                 self.pasteMulti(image, number, directory, file_name)
                 log_msg = logCardName(number_name)

@@ -13,6 +13,6 @@ class MgException(Exception):
     pass
 
 
-class TimeoutException(MgException):
+class MgNetworkException(MgException):
     '''Thrown if the website cannot be reached.'''
     pass

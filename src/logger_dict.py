@@ -46,10 +46,8 @@ MG_LOGGER_CONST = {
     'bad_input': 'Could not open input file: %s',
 
     # Timeout error getting a card from the network
-    'timeout_error': (
-        'Could not retrive %s from %s due to timeout. ' +
-        'Website or internet connection is down'
-    ),
+    'network_error': (
+        'Could not connect to %s. Reason: %s.'),
 
     # Error message for HTML code when it is not 200
     'html_error': 'Unexpected HTML status code %d for %s',
@@ -57,8 +55,8 @@ MG_LOGGER_CONST = {
     # Error message for unexpected content type of HTML response
     'ct_error': 'Expected Content-Type %s. Received %s instead from %s',
 
-    # Failed card download (but no timeout, see ct_error for that)
-    'card_error': 'Could not download %s. Reason: %s'
+    # Failed card download (second placeholder is the reason)
+    'card_error': 'Could not download %s. %s'
 }
 
 
