@@ -122,6 +122,20 @@ class LoggerTests(unittest.TestCase):
 
         self.log_capt.check(*log_list)
 
+    def test_card_404(self):
+        '''Test for non-existant cards'''
+        file_path = self.helper_file_path('card_error.txt')
+        main([file_path])
+
+        log_list = self.helper_log_template(
+            file_path, 5, 1,
+            self.log_card_paste((None, 3, None, 'Swamp')),
+            self.log_card_paste((None, 2, 'M10', 'Forest')),
+            self.log_card_404((None, 4, None, 'SwampX'))
+        )
+
+        self.log_capt.check(*log_list)
+
     def helper_file_path(self, file_name):
         '''Return the relative file path from the module root'''
         base_path = 'test/files'
@@ -193,12 +207,15 @@ class LoggerTests(unittest.TestCase):
             MG_LOGGER_CONST['timeout_error'] % (card_name, address)
         )
 
-    def log_card_error(self, card_input, reason):
+    def log_card_404(self, card_input):
         '''Error logged when card cannot be downloaded'''
         card_name = logCardName(card_input)
         return (
             MG_LOGGER_CONST['base_name'], 'ERROR',
-            MG_LOGGER_CONST['card_error'] % (card_name, reason)
+            MG_LOGGER_CONST['card_error'] % (
+                card_name,
+                MG_LOGGER_CONST['html_error'] % (404, createAddress(card_name))
+            )
         )
 
 if __name__ == '__main__':
