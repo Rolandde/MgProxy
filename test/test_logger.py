@@ -220,7 +220,9 @@ class LoggerTests(unittest.TestCase):
             MG_LOGGER_CONST['base_name'], 'ERROR',
             MG_LOGGER_CONST['card_error'] % (
                 card_name,
-                MG_LOGGER_CONST['html_error'] % (404, createAddress(card_name))
+                MG_LOGGER_CONST['html_error'] % (
+                    404,
+                    createAddress(card_input[3], card_input[2]))
             )
         )
 
