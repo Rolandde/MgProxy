@@ -193,5 +193,13 @@ class LoggerTests(unittest.TestCase):
             MG_LOGGER_CONST['timeout_error'] % (card_name, address)
         )
 
+    def log_card_error(self, card_input, reason):
+        '''Error logged when card cannot be downloaded'''
+        card_name = logCardName(card_input)
+        return (
+            MG_LOGGER_CONST['base_name'], 'ERROR',
+            MG_LOGGER_CONST['card_error'] % (card_name, reason)
+        )
+
 if __name__ == '__main__':
     unittest.main()

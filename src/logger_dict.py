@@ -55,7 +55,10 @@ MG_LOGGER_CONST = {
     'html_error': 'Unexpected HTML status code %d for %s',
 
     # Error message for unexpected content type of HTML response
-    'ct_error': 'Expected content_type %s. Received %s instead from %s'
+    'ct_error': 'Expected Content-Type %s. Received %s instead from %s',
+
+    # Failed card download (but no timeout, see ct_error for that)
+    'card_error': 'Could not download %s. Reason: %s'
 }
 
 

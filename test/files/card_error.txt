@@ -1,0 +1,6 @@
+//Syntatically correct and all the cards exist
+3 Swamp
+2 [M10] Forest
+
+//Card does not exist
+4 SwampX
