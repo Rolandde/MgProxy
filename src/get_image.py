@@ -76,6 +76,9 @@ def addressErrorDecorator(f):
                 # Cause a timeout address by adding port 81
                 timeout_address = 'http://mtgimage.com:81/'
                 return f(card_name, set_name, timeout_address)
+            elif ADDRESS_ERROR[0] == 'content_type':
+                # Returns text/html data rather than jpeg or json
+                return 'http://mtgimage.com/'
 
         # returns unchaged function call if ADDRESS_ERROR is empty
         return f(card_name, set_name, *args, **kwargs)
