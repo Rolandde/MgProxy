@@ -136,6 +136,29 @@ class LoggerTests(unittest.TestCase):
 
         self.log_capt.check(*log_list)
 
+    def test_content_type(self):
+        '''Tests logging for bad content type'''
+        file_path = self.helper_file_path('good_input.txt')
+
+        # Causes the content type error by returning html address
+        ADDRESS_ERROR.append('content_type')
+
+        # sys.argv always returns a list, so I need to supply a list
+        main([file_path])
+        log_list = self.helper_log_template(
+            file_path, 0, 0,
+            self.log_bad_content(
+                (None, 2, None, 'Swamp'),
+                'image/jpeg', 'text/html; charset=utf-8'
+            ),
+            self.log_bad_content(
+                (None, 2, 'M10', 'Forest'),
+                'image/jpeg', 'text/html; charset=utf-8'
+            )
+        )
+
+        self.log_capt.check(*log_list)
+
     def helper_file_path(self, file_name):
         '''Return the relative file path from the module root'''
         base_path = 'test/files'
@@ -223,6 +246,20 @@ class LoggerTests(unittest.TestCase):
                 MG_LOGGER_CONST['html_error'] % (
                     404,
                     createAddress(card_input[3], card_input[2]))
+            )
+        )
+
+    def log_bad_content(self, card_input, expected, received):
+        '''Error logged when file content type is unexpected'''
+        card_name = logCardName(card_input)
+        return (
+            MG_LOGGER_CONST['base_name'], 'ERROR',
+            MG_LOGGER_CONST['card_error'] % (
+                card_name,
+                MG_LOGGER_CONST['ct_error'] % (
+                    expected, received,
+                    createAddress(card_input[3], card_input[2])
+                )
             )
         )
 
