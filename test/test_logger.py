@@ -44,77 +44,77 @@ class LoggerTests(unittest.TestCase):
         for f in filelist:
             os.remove(os.path.join(base_path, f))
 
-    def test_empty_file(self):
+    def testEmptyFile(self):
         '''Tests the log output for an empty file'''
-        file_path = self.helper_file_path('empty_input.txt')
+        file_path = self.helperFilePath('empty_input.txt')
 
         # sys.argv always returns a list, so I need to supply a list
         main([file_path])
-        log_list = self.helper_log_template(file_path, 0, 0)
+        log_list = self.helperLogTemplate(file_path, 0, 0)
         self.log_capt.check(*log_list)
 
-    def test_correct_file(self):
+    def testCorrectFile(self):
         '''Tests syntatically correct files where all cards exist'''
-        file_path = self.helper_file_path('good_input.txt')
+        file_path = self.helperFilePath('good_input.txt')
 
         # sys.argv always returns a list, so I need to supply a list
         main([file_path])
-        log_list = self.helper_log_template(
+        log_list = self.helperLogTemplate(
             file_path, 4, 1,
-            self.log_card_paste((None, 2, None, 'Swamp')),
-            self.log_card_paste((None, 2, 'M10', 'Forest'))
+            self.logCardPaste((None, 2, None, 'Swamp')),
+            self.logCardPaste((None, 2, 'M10', 'Forest'))
         )
 
         self.log_capt.check(*log_list)
 
-    def test_bad_parse(self):
+    def testBadParse(self):
         '''Test various versions of bad parse'''
-        file_path = self.helper_file_path('bad_parse_input.txt')
+        file_path = self.helperFilePath('bad_parse_input.txt')
 
         # sys.argv always returns a list, so I need to supply a list
         main([file_path])
-        log_list = self.helper_log_template(
+        log_list = self.helperLogTemplate(
             file_path, 4, 1,
-            self.log_bad_parse('Forest'),
-            self.log_bad_parse('[M10] Forest'),
-            self.log_bad_parse('SB: Forest'),
-            self.log_bad_parse('A Forest'),
-            self.log_bad_parse('2'),
-            self.log_bad_parse('SB: 2'),
-            self.log_bad_parse('2Forest'),
-            self.log_bad_parse('SB: 1[M10] Forest'),
-            self.log_card_paste((None, 2, None, 'Swamp')),
-            self.log_card_paste((None, 2, 'M10', 'Forest'))
+            self.logBadParse('Forest'),
+            self.logBadParse('[M10] Forest'),
+            self.logBadParse('SB: Forest'),
+            self.logBadParse('A Forest'),
+            self.logBadParse('2'),
+            self.logBadParse('SB: 2'),
+            self.logBadParse('2Forest'),
+            self.logBadParse('SB: 1[M10] Forest'),
+            self.logCardPaste((None, 2, None, 'Swamp')),
+            self.logCardPaste((None, 2, 'M10', 'Forest'))
         )
 
         self.log_capt.check(*log_list)
 
-    def test_bad_file(self):
+    def testBadFile(self):
         '''Test logging when input file cannot be accessed'''
         file_path = '/file/does/not/exist'
 
         main([file_path])
         self.log_capt.check(
-            self.log_start(),
-            self.log_bad_file(file_path)
+            self.logStart(),
+            self.logBadFile(file_path)
         )
 
-    def test_network_error(self):
+    def testNetworkError(self):
         '''Test that a timeout is correctly logged'''
 
         # Set timeout flag (will be reset in setUp)
         ADDRESS_ERROR.append('timeout')
 
-        file_path = self.helper_file_path('good_input.txt')
+        file_path = self.helperFilePath('good_input.txt')
 
         main([file_path])
-        log_list = self.helper_log_template(
+        log_list = self.helperLogTemplate(
             file_path, 0, 0,
-            self.log_network_error(
+            self.logNetworkError(
                 (None, 2, None, 'Swamp'),
                 createAddress('Swamp', None)
             ),
-            self.log_network_error(
+            self.logNetworkError(
                 (None, 2, 'M10', 'Forest'),
                 createAddress('Forest', 'M10')
             )
@@ -122,36 +122,36 @@ class LoggerTests(unittest.TestCase):
 
         self.log_capt.check(*log_list)
 
-    def test_card_404(self):
+    def testCard404(self):
         '''Test for non-existant cards'''
-        file_path = self.helper_file_path('card_error.txt')
+        file_path = self.helperFilePath('card_error.txt')
         main([file_path])
 
-        log_list = self.helper_log_template(
+        log_list = self.helperLogTemplate(
             file_path, 5, 1,
-            self.log_card_paste((None, 3, None, 'Swamp')),
-            self.log_card_paste((None, 2, 'M10', 'Forest')),
-            self.log_card_404((None, 4, None, 'SwampX'))
+            self.logCardPaste((None, 3, None, 'Swamp')),
+            self.logCardPaste((None, 2, 'M10', 'Forest')),
+            self.logCard404((None, 4, None, 'SwampX'))
         )
 
         self.log_capt.check(*log_list)
 
-    def test_content_type(self):
+    def testBadContentType(self):
         '''Tests logging for bad content type'''
-        file_path = self.helper_file_path('good_input.txt')
+        file_path = self.helperFilePath('good_input.txt')
 
         # Causes the content type error by returning html address
         ADDRESS_ERROR.append('content_type')
 
         # sys.argv always returns a list, so I need to supply a list
         main([file_path])
-        log_list = self.helper_log_template(
+        log_list = self.helperLogTemplate(
             file_path, 0, 0,
-            self.log_bad_content(
+            self.logBadTypeContent(
                 (None, 2, None, 'Swamp'),
                 'image/jpeg', 'text/html; charset=utf-8'
             ),
-            self.log_bad_content(
+            self.logBadTypeContent(
                 (None, 2, 'M10', 'Forest'),
                 'image/jpeg', 'text/html; charset=utf-8'
             )
@@ -159,33 +159,33 @@ class LoggerTests(unittest.TestCase):
 
         self.log_capt.check(*log_list)
 
-    def helper_file_path(self, file_name):
+    def helperFilePath(self, file_name):
         '''Return the relative file path from the module root'''
         base_path = 'test/files'
         return os.path.join(base_path, file_name)
 
-    def helper_log_template(self, file_path, cards, pages, *args):
+    def helperLogTemplate(self, file_path, cards, pages, *args):
         '''Creates the boiler blate logging calls'''
-        log_list = [self.log_start()]
+        log_list = [self.logStart()]
 
         if file_path:
-            log_list.append(self.log_save(file_path))
+            log_list.append(self.logSave(file_path))
 
         if args:
             log_list = log_list + list(args)
 
-        log_list.append(self.log_total(cards, pages))
+        log_list.append(self.logTotal(cards, pages))
 
         return log_list
 
-    def log_start(self):
+    def logStart(self):
         '''Returns program start log message tuple for testing purposes'''
         return (
             MG_LOGGER_CONST['base_name'], 'INFO',
             MG_LOGGER_CONST['start_prog']
         )
 
-    def log_card_paste(self, card_input):
+    def logCardPaste(self, card_input):
         '''Returns log message when a card is succesfully pasted'''
         card_name = logCardName(card_input)
         return (
@@ -193,7 +193,7 @@ class LoggerTests(unittest.TestCase):
             MG_LOGGER_CONST['good_paste'] % (card_input[1], card_name)
         )
 
-    def log_save(self, file_path):
+    def logSave(self, file_path):
         '''Returns log message stating the save directory'''
         directory, file_name = splitFile(file_path)
         return (
@@ -201,28 +201,28 @@ class LoggerTests(unittest.TestCase):
             MG_LOGGER_CONST['save_loc'] % directory
         )
 
-    def log_total(self, card_numb, page_numb):
+    def logTotal(self, card_numb, page_numb):
         '''Returns log message stating card number pasted across numb pages'''
         return (
             MG_LOGGER_CONST['base_name'], 'INFO',
             MG_LOGGER_CONST['final_msg'] % (card_numb, page_numb)
         )
 
-    def log_bad_parse(self, line):
+    def logBadParse(self, line):
         '''Error message when input line cannot be parsed'''
         return (
             MG_LOGGER_CONST['base_name'], 'ERROR',
             MG_LOGGER_CONST['bad_parse'] % line
         )
 
-    def log_bad_file(self, file_path):
+    def logBadFile(self, file_path):
         '''Error log when input file does not exist or could not be accessed'''
         return (
             MG_LOGGER_CONST['base_name'], 'CRITICAL',
             MG_LOGGER_CONST['bad_input'] % file_path
         )
 
-    def log_network_error(self, card_input, address):
+    def logNetworkError(self, card_input, address):
         '''Error log when website access times out'''
         card_name = logCardName(card_input)
         return (
@@ -236,7 +236,7 @@ class LoggerTests(unittest.TestCase):
             )
         )
 
-    def log_card_404(self, card_input):
+    def logCard404(self, card_input):
         '''Error logged when card cannot be downloaded'''
         card_name = logCardName(card_input)
         return (
@@ -249,7 +249,7 @@ class LoggerTests(unittest.TestCase):
             )
         )
 
-    def log_bad_content(self, card_input, expected, received):
+    def logBadTypeContent(self, card_input, expected, received):
         '''Error logged when file content type is unexpected'''
         card_name = logCardName(card_input)
         return (
