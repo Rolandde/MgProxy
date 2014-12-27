@@ -74,10 +74,13 @@ class MgImageCreator(object):
         # reason.
         self.invalid_names = []
 
+        # The current image in memory to be pasted
+        self.image = None
+
         # Store logger is specified (None otherwise)
         self.logger = logger
 
-    def paste(self, image):
+    def paste(self):
         '''Pastes the image into the next slot on the canvas.
         TODO: This should throw an exception if there are no more free spaces.
         TODO: Make the xy variable calculation a lot more readable.
@@ -87,15 +90,15 @@ class MgImageCreator(object):
             self.xy[0], int(
                 round(
                     self.pic_count/self.xy[0], 0)))
-        pasteImage(self.current_canvas, image, self.dpi, self.wh, xy)
+        pasteImage(self.current_canvas, self.image, self.dpi, self.wh, xy)
         self.pic_count += 1
         self.total_pic += 1
 
-    def pasteMulti(self, image, number, directory, file_name):
+    def pasteMulti(self, number, directory, file_name):
         '''Pastes the provided image the specified number of times, saving the
         canvas as required.'''
         for _ in xrange(0, number):
-            self.paste(image)
+            self.paste()
 
             if self.pic_count == self.xy[0] * self.xy[1]:
                 self.save(directory, file_name)
@@ -135,31 +138,22 @@ class MgImageCreator(object):
             number, set_name, card_name = number_name[
                 1], number_name[2], number_name[3]
 
-            # Will be assigned if no errors are detected
-            image = None
-
             if local:
-                image = getLocalMgImage(directory, card_name)
+                success = self.getImageFromDisk(directory, card_name)
             else:
-                try:
-                    image = getMgImage(card_name, set_name)
-                except MgNetworkException as reason:
-                    self.logger.error(
-                        MG_LOGGER_CONST['card_error'] % (
-                            logCardName(number_name),
-                            reason
-                        )
-                    )
+                success = self.getMgImageFromWeb(card_name, set_name)
 
-            if image:
-                validateImage(image)
+            if success:
+                validateImage(self.image)
 
-            if image:
-                self.pasteMulti(image, number, directory, file_name)
+            if success:
+                self.pasteMulti(number, directory, file_name)
                 log_msg = logCardName(number_name)
                 self.logInfo(
                     MG_LOGGER_CONST['good_paste'] % (number_name[1], log_msg)
                 )
+
+            self.image = None
 
         if (self.pic_count > 0):
             self.save(directory, file_name)
@@ -169,6 +163,30 @@ class MgImageCreator(object):
         )
 
         return self.reset()
+
+    def getMgImageFromWeb(self, card_name, set_name):
+        '''Download the image from the web.
+
+        Return true if no errors were encountered, otherwise returns false
+        and logs the errors.
+        '''
+        try:
+            self.image = getMgImage(card_name, set_name)
+        except MgNetworkException as reason:
+            self.logger.error(
+                MG_LOGGER_CONST['card_error'] % (
+                    # logCardName expects a tupple of card info
+                    logCardName((None, None, set_name, card_name)),
+                    reason
+                )
+            )
+            return False
+        else:
+            return True
+
+    def getImageFromDisk(self, directory, card_name):
+        self.image = getLocalMgImage(directory, card_name)
+        return True
 
     def save(self, directory, file_name):
         '''Saves the file_name to the directory.
