@@ -135,20 +135,26 @@ class MgImageCreator(object):
             number, set_name, card_name = number_name[
                 1], number_name[2], number_name[3]
 
-            try:
-                if local:
-                    image = getLocalMgImage(directory, card_name)
-                else:
-                    image = getMgImage(card_name, set_name)
-                validateImage(image)
-            except MgNetworkException as reason:
-                self.logger.error(
-                    MG_LOGGER_CONST['card_error'] % (
-                        logCardName(number_name),
-                        reason
-                    )
-                )
+            # Will be assigned if no errors are detected
+            image = None
+
+            if local:
+                image = getLocalMgImage(directory, card_name)
             else:
+                try:
+                    image = getMgImage(card_name, set_name)
+                except MgNetworkException as reason:
+                    self.logger.error(
+                        MG_LOGGER_CONST['card_error'] % (
+                            logCardName(number_name),
+                            reason
+                        )
+                    )
+
+            if image:
+                validateImage(image)
+
+            if image:
                 self.pasteMulti(image, number, directory, file_name)
                 log_msg = logCardName(number_name)
                 self.logInfo(
