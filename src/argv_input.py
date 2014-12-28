@@ -60,3 +60,13 @@ arg_parser.add_argument(
         PAGE_X,
         PAGE_Y],
     metavar='int')
+
+arg_parser.add_argument(
+    '-f', '--opt_file_name',
+    help=(
+        'Specify the file names of the saved pages. Default is the file name' +
+        ' of the input text file.'
+    ),
+    type=str,
+    metavar='optional_file_name'
+)
