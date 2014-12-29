@@ -11,7 +11,7 @@ arg_parser.add_argument(
     'file_name',
     help=('File path containing cards in the following format: ' +
           '[SB:] card_number [set] card_name'),
-    metavar='file_path',
+    metavar='input file',
     type=str
     )
 
@@ -32,7 +32,7 @@ source_of_image.add_argument(
 
 # Optional arguements
 arg_parser.add_argument(
-    '--dpi',
+    '-r', '--dpi',
     help='Specify the dpi (pixels per inch) for printing. Default: 300dpi',
     default=DPI,
     type=int
@@ -45,10 +45,9 @@ arg_parser.add_argument(
           'Default: 2.49 3.49.'),
     nargs=2,
     type=int,
-    default=[
-        WIDTH,
-        HIGHT],
-    metavar='inch')
+    default=[WIDTH, HIGHT],
+    metavar=('width', 'hight')
+)
 
 arg_parser.add_argument(
     '-n',
@@ -56,17 +55,16 @@ arg_parser.add_argument(
     help='The number of cards going across and down a page. Default: 4 and 2.',
     nargs=2,
     type=int,
-    default=[
-        PAGE_X,
-        PAGE_Y],
-    metavar='int')
+    default=[PAGE_X, PAGE_Y],
+    metavar=('across', 'down')
+)
 
 arg_parser.add_argument(
     '-f', '--opt_file_name',
     help=(
         'Specify the file names of the saved pages. Default is the file name' +
-        ' of the input text file.'
+        ' of the input file.'
     ),
     type=str,
-    metavar='optional_file_name'
+    metavar='optional file name'
 )
