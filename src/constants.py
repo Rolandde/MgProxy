@@ -7,6 +7,30 @@ JSON_EXT = '.json'  # Extension for json files on mtgjson.com
 TIMEOUT = 0.5  # Timeout (sec) for urllib2.geturl()
 CARD_EXT = '.hq.jpg'  # Extension to add to card html address
 
+# The options used for args parsing (see src/argv_input)
+ARG_CONST = {
+    # Input file name
+    'input_file': 'input_file',
+
+    # Get images from the web
+    'web': 'web_based',
+
+    # Get images from local file
+    'local': 'local_file',
+
+    # Specify the DPI
+    'dpi': 'dpi',
+
+    # Card dimensions
+    'dimension': 'card_dimensions',
+
+    # Card number
+    'number': 'card_number',
+
+    # Different file name
+    'alt_name': 'opt_file_name'
+}
+
 
 class MgException(Exception):
     '''Base Exception class used for this program'''
