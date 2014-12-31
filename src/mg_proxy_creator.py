@@ -4,7 +4,7 @@ import sys
 import logging
 
 from src.create_page import MgImageCreator
-from src.constants import MgException
+from src.constants import MgException, ARG_CONST
 from src.argv_input import arg_parser
 from src.logger_dict import MG_LOGGER_CONST
 
@@ -82,11 +82,21 @@ def errorLog(msg):
         sys.stderr.write(to_write)
 
 
+def createMgInstance(parsed_input):
+    '''Creates an instance of the MgImageCreator class.'''
+    return MgImageCreator(
+        parsed_input[ARG_CONST['dpi']],
+        parsed_input[ARG_CONST['dimension']],
+        parsed_input[ARG_CONST['number']],
+        logger
+        )
+
+
 def createFromWebOrLocal(parsed_input):
     '''Takes parsed input from arg_parser and shunts it to function'''
     logger.info(MG_LOGGER_CONST['start_prog'])
 
-    full_path = parsed_input['file_name']
+    full_path = parsed_input[ARG_CONST['input_file']]
     try:
         f = open(full_path, 'rU')
     except IOError:
@@ -97,14 +107,9 @@ def createFromWebOrLocal(parsed_input):
 
         user_input, invalid_lines = parseFile(f)
 
-        creator = MgImageCreator(
-            parsed_input['dpi'],
-            parsed_input['card_dimensions'],
-            parsed_input['card_number'],
-            logger
-        )
+        creator = createMgInstance(parsed_input)
 
-        if parsed_input['local_file']:
+        if parsed_input[ARG_CONST['local']]:
             invalid_cards = creator.createFromLocal(
                 user_input,
                 file_path,
