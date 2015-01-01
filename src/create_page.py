@@ -35,17 +35,15 @@ def resizeImage(image, dpi, wh):
     return image.resize((new_x, new_y), Image.ANTIALIAS)
 
 
-def pasteImage(canvas, image, dpi, wh, xy):
-    '''Paste an image onto a canvas.
+def pasteImage(canvas, image, xy):
+    '''Paste an image onto a canvas at specific position.
 
-    Provide desired dpi and width/hight of
-    image. XY coordinates are given by increasing positives integers. For
+    XY coordinates are given by increasing positives integers. For
     example (2, 3) would mean the image would be in the second column,
     third row. Correct spacing between the images is guaranteed if the
-    wh and dpi values do not change.
+    pasted images are identical size.
     '''
-    new_image = resizeImage(image, dpi, wh)
-    canvas.paste(new_image, (new_image.size[0]*xy[0], new_image.size[1]*xy[1]))
+    canvas.paste(image, (image.size[0]*xy[0], image.size[1]*xy[1]))
 
     return canvas
 
@@ -90,7 +88,7 @@ class MgImageCreator(object):
             self.xy[0], int(
                 round(
                     self.pic_count/self.xy[0], 0)))
-        pasteImage(self.current_canvas, self.image, self.dpi, self.wh, xy)
+        pasteImage(self.current_canvas, self.image, xy)
         self.pic_count += 1
         self.total_pic += 1
 
@@ -147,6 +145,7 @@ class MgImageCreator(object):
                 validateImage(self.image)
 
             if success:
+                self.image = resizeImage(self.image, self.dpi, self.wh)
                 self.pasteMulti(number, directory, file_name)
                 log_msg = logCardName(number_name)
                 self.logInfo(
