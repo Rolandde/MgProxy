@@ -172,13 +172,14 @@ class MgImageCreator(object):
         try:
             self.image = getMgImage(card_name, set_name)
         except MgNetworkException as reason:
-            self.logger.error(
-                MG_LOGGER_CONST['card_error'] % (
-                    # logCardName expects a tupple of card info
-                    logCardName((None, None, set_name, card_name)),
-                    reason
+            if self.logger:
+                self.logger.error(
+                    MG_LOGGER_CONST['card_error'] % (
+                        # logCardName expects a tupple of card info
+                        logCardName((None, None, set_name, card_name)),
+                        reason
+                    )
                 )
-            )
             return False
         else:
             return True

@@ -1,12 +1,14 @@
 '''Tests that the logging calls behave properly'''
 import unittest
+import logging
 import logging.config
 import os.path
 
 from src.logger_dict import MG_LOGGER, MG_LOGGER_CONST, logCardName
-from src.mg_proxy_creator import main, splitFile
-from src.get_image import createAddress
-from src.get_image import ADDRESS_ERROR
+from src.mg_proxy_creator import main, splitFile, parseFile
+from src.get_image import createAddress, ADDRESS_ERROR
+from src.create_page import MgImageCreator
+import src.constants as CON
 
 # If testfixtures in not available, skip these tests
 SKIP_TEST = False
@@ -27,6 +29,9 @@ class LoggerTests(unittest.TestCase):
         logging.config.dictConfig(MG_LOGGER)
 
     def setUp(self):
+        # The logger itself
+        self.logger = logging.getLogger(MG_LOGGER_CONST['base_name'])
+
         # For each test a new LogCapture instance is called
         self.log_capt = LogCapture(MG_LOGGER_CONST['base_name'])
 
@@ -70,11 +75,10 @@ class LoggerTests(unittest.TestCase):
     def testBadParse(self):
         '''Test various versions of bad parse'''
         file_path = self.helperFilePath('bad_parse_input.txt')
+        f = open(file_path, 'rU')
+        parseFile(f)
 
-        # sys.argv always returns a list, so I need to supply a list
-        main([file_path])
-        log_list = self.helperLogTemplate(
-            file_path, 4, 1,
+        self.log_capt.check(
             self.logBadParse('Forest'),
             self.logBadParse('[M10] Forest'),
             self.logBadParse('SB: Forest'),
@@ -83,11 +87,7 @@ class LoggerTests(unittest.TestCase):
             self.logBadParse('SB: 2'),
             self.logBadParse('2Forest'),
             self.logBadParse('SB: 1[M10] Forest'),
-            self.logCardPaste((None, 2, None, 'Swamp')),
-            self.logCardPaste((None, 2, 'M10', 'Forest'))
         )
-
-        self.log_capt.check(*log_list)
 
     def testBadFile(self):
         '''Test logging when input file cannot be accessed'''
@@ -105,59 +105,67 @@ class LoggerTests(unittest.TestCase):
         # Set timeout flag (will be reset in setUp)
         ADDRESS_ERROR.append('timeout')
 
-        file_path = self.helperFilePath('good_input.txt')
+        creator = self.helperInitMgCreator()
+        no_set = creator.getMgImageFromWeb('Swamp', None)
+        with_set = creator.getMgImageFromWeb('Forest', 'M10')
 
-        main([file_path])
-        log_list = self.helperLogTemplate(
-            file_path, 0, 0,
+        self.assertFalse(no_set)
+        self.assertFalse(with_set)
+
+        self.log_capt.check(
             self.logNetworkError(
-                (None, 2, None, 'Swamp'),
+                (None, None, None, 'Swamp'),
                 createAddress('Swamp', None)
             ),
             self.logNetworkError(
-                (None, 2, 'M10', 'Forest'),
+                (None, None, 'M10', 'Forest'),
                 createAddress('Forest', 'M10')
             )
         )
 
-        self.log_capt.check(*log_list)
-
     def testCard404(self):
         '''Test for non-existant cards'''
-        file_path = self.helperFilePath('card_error.txt')
-        main([file_path])
+        creator = self.helperInitMgCreator()
+        wrong_card = creator.getMgImageFromWeb('ForestXXX', None)
+        wrong_set = creator.getMgImageFromWeb('Swamp', 'XXX')
 
-        log_list = self.helperLogTemplate(
-            file_path, 5, 1,
-            self.logCardPaste((None, 3, None, 'Swamp')),
-            self.logCardPaste((None, 2, 'M10', 'Forest')),
-            self.logCard404((None, 4, None, 'SwampX'))
+        self.assertFalse(wrong_card)
+        self.assertFalse(wrong_set)
+
+        self.log_capt.check(
+            self.logCard404((None, None, None, 'ForestXXX')),
+            self.logCard404((None, None, 'XXX', 'Swamp'))
         )
-
-        self.log_capt.check(*log_list)
 
     def testBadContentType(self):
         '''Tests logging for bad content type'''
-        file_path = self.helperFilePath('good_input.txt')
-
         # Causes the content type error by returning html address
         ADDRESS_ERROR.append('content_type')
 
-        # sys.argv always returns a list, so I need to supply a list
-        main([file_path])
-        log_list = self.helperLogTemplate(
-            file_path, 0, 0,
+        creator = self.helperInitMgCreator()
+        no_set = creator.getMgImageFromWeb('Swamp', None)
+        with_set = creator.getMgImageFromWeb('Forest', 'M10')
+
+        self.assertFalse(no_set)
+        self.assertFalse(with_set)
+
+        self.log_capt.check(
             self.logBadTypeContent(
-                (None, 2, None, 'Swamp'),
+                (None, None, None, 'Swamp'),
                 'image/jpeg', 'text/html; charset=utf-8'
             ),
             self.logBadTypeContent(
-                (None, 2, 'M10', 'Forest'),
+                (None, None, 'M10', 'Forest'),
                 'image/jpeg', 'text/html; charset=utf-8'
             )
         )
 
-        self.log_capt.check(*log_list)
+    def helperInitMgCreator(self):
+        '''Creates an instance of the MgImageCreator class'''
+        return MgImageCreator(
+            CON.DPI, (CON.WIDTH, CON.HIGHT),
+            (CON.PAGE_X, CON.PAGE_Y), self.logger
+        )
 
     def helperFilePath(self, file_name):
         '''Return the relative file path from the module root'''
