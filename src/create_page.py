@@ -172,14 +172,13 @@ class MgImageCreator(object):
         try:
             self.image = getMgImage(card_name, set_name)
         except MgNetworkException as reason:
-            if self.logger:
-                self.logger.error(
-                    MG_LOGGER_CONST['card_error'] % (
-                        # logCardName expects a tupple of card info
-                        logCardName((None, None, set_name, card_name)),
-                        reason
-                    )
+            self.logError(
+                MG_LOGGER_CONST['card_error'] % (
+                    # logCardName expects a tupple of card info
+                    logCardName((None, None, set_name, card_name)),
+                    reason
                 )
+            )
             return False
         else:
             return True
@@ -211,8 +210,14 @@ class MgImageCreator(object):
         self.startNextPage()
 
     def logInfo(self, message):
+        '''Logs an info message if a logger has been provided'''
         if self.logger:
             self.logger.info(message)
+
+    def logError(self, message):
+        '''Logs an error message if a logger has been provided'''
+        if self.logger:
+            self.logger.error(message)
 
     def createFromWeb(self, name_array, directory, file_name):
         '''Wrapper function to run image creation from web-based image files.'''
