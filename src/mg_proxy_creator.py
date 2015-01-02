@@ -61,16 +61,6 @@ def parseFile(f):
     return (valid_list, invalid_lines)
 
 
-def splitFile(file_path):
-    '''Takes a file path and returns (directory, file_name) tupple.
-    The file_name will be an empty string if only a directory path is given.'''
-    abs_path = os.path.abspath(file_path)  # In case relative path is provided
-    directory, file_name = os.path.split(abs_path)
-    # Removes any extension in the filename
-    file_name = os.path.splitext(file_name)[0]
-    return (directory, file_name)
-
-
 def errorLog(msg):
     '''Prints out error message to the error stream.
     Expects a list of two element tupples: the offending line and the reason'''
@@ -92,6 +82,20 @@ def createMgInstance(parsed_input):
         )
 
 
+def getFileNamePath(file_path):
+    '''Returns a tupple containing the file path and file name.
+
+    Relative paths will first be converted to absolute paths.
+    The file path is where the files will be saved to with their file name.
+    The file_name will be an empty string if only a directory path is given.
+    '''
+    abs_path = os.path.abspath(file_path)  # In case relative path is provided
+    directory, file_name = os.path.split(abs_path)
+    # Removes any extension in the filename
+    file_name = os.path.splitext(file_name)[0]
+    return (directory, file_name)
+
+
 def createFromWebOrLocal(parsed_input):
     '''Takes parsed input from arg_parser and shunts it to function'''
     logger.info(MG_LOGGER_CONST['start_prog'])
@@ -102,7 +106,7 @@ def createFromWebOrLocal(parsed_input):
     except IOError:
         logger.critical(MG_LOGGER_CONST['bad_input'] % full_path)
     else:
-        file_path, file_name = splitFile(full_path)
+        file_path, file_name = getFileNamePath(full_path)
         logger.info(MG_LOGGER_CONST['save_loc'] % file_path)
 
         user_input, invalid_lines = parseFile(f)
