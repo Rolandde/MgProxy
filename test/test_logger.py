@@ -5,7 +5,7 @@ import logging.config
 import os.path
 
 from src.logger_dict import MG_LOGGER, MG_LOGGER_CONST, logCardName
-from src.mg_proxy_creator import main, splitFile, parseFile
+from src.mg_proxy_creator import main, getFileNamePath, parseFile
 from src.get_image import createAddress, ADDRESS_ERROR
 from src.create_page import MgImageCreator
 import src.constants as CON
@@ -203,7 +203,7 @@ class LoggerTests(unittest.TestCase):
 
     def logSave(self, file_path):
         '''Returns log message stating the save directory'''
-        directory, file_name = splitFile(file_path)
+        directory, file_name = getFileNamePath(file_path)
         return (
             MG_LOGGER_CONST['base_name'], 'INFO',
             MG_LOGGER_CONST['save_loc'] % directory
