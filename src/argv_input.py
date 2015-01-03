@@ -73,5 +73,15 @@ arg_parser.add_argument(
         ' of the input file.'
     ),
     type=str,
-    metavar='optional file name'
+    metavar='optional_file_name'
+)
+
+arg_parser.add_argument(
+    '-p', addFlag(ARG_CONST['opt_path']),
+    help=(
+        'Specify file path for saved pages. Default is the file path of' +
+        ' input file.'
+    ),
+    type=str,
+    metavar='optional_file_path'
 )

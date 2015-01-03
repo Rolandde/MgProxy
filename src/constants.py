@@ -28,7 +28,10 @@ ARG_CONST = {
     'number': 'card_number',
 
     # Different file name
-    'alt_name': 'opt_file_name'
+    'alt_name': 'opt_file_name',
+
+    # Different file path
+    'opt_path': 'opt_file_path'
 }
 
 
