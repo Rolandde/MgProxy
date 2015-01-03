@@ -38,7 +38,7 @@ class TestArgs(unittest.TestCase):
         '''Test that the user can provide optional file path'''
         # Test providing an absolute path
         abs_path = vars(arg_parser.parse_args(
-            ['name_program', '--'+CON.ARG_CONST['opt_path'], '/opt/bin/t.txt']
+            ['name_program', '--'+CON.ARG_CONST['opt_path'], '/opt/bin']
         ))
 
         results = getFileNamePath(
@@ -50,7 +50,7 @@ class TestArgs(unittest.TestCase):
 
         # Test providing a relative path
         rel_path = vars(arg_parser.parse_args(
-            ['name_program', '--'+CON.ARG_CONST['opt_path'], 'opt/bin/t.txt']
+            ['name_program', '--'+CON.ARG_CONST['opt_path'], 'opt/bin/']
         ))
 
         results = getFileNamePath(
