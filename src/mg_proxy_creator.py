@@ -82,9 +82,10 @@ def createMgInstance(parsed_input):
         )
 
 
-def getFileNamePath(file_path):
+def getFileNamePath(file_path, parsed_args=None):
     '''Returns a tupple containing the file path and file name.
 
+    Parsed_args can be used to over-ride the returned values.
     Relative paths will first be converted to absolute paths.
     The file path is where the files will be saved to with their file name.
     The file_name will be an empty string if only a directory path is given.
@@ -93,6 +94,12 @@ def getFileNamePath(file_path):
     directory, file_name = os.path.split(abs_path)
     # Removes any extension in the filename
     file_name = os.path.splitext(file_name)[0]
+
+    if parsed_args is not None:
+        alt_file_name = parsed_args[ARG_CONST['alt_name']]
+        if alt_file_name is not None:
+            file_name = alt_file_name
+
     return (directory, file_name)
 
 
@@ -106,7 +113,7 @@ def createFromWebOrLocal(parsed_input):
     except IOError:
         logger.critical(MG_LOGGER_CONST['bad_input'] % full_path)
     else:
-        file_path, file_name = getFileNamePath(full_path)
+        file_path, file_name = getFileNamePath(full_path, parsed_input)
         logger.info(MG_LOGGER_CONST['save_loc'] % file_path)
 
         user_input, invalid_lines = parseFile(f)
