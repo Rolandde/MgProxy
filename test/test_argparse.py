@@ -1,6 +1,6 @@
 '''Tests that args provided by user are correctly parsed and processed'''
 import unittest
-import sys
+import os.path
 
 from src.argv_input import arg_parser
 from src.mg_proxy_creator import createMgInstance, getFileNamePath
@@ -36,6 +36,7 @@ class TestArgs(unittest.TestCase):
 
     def test_opt_file_path(self):
         '''Test that the user can provide optional file path'''
+        # Test providing an absolute path
         abs_path = vars(arg_parser.parse_args(
             ['name_program', '--'+CON.ARG_CONST['opt_path'], '/opt/bin/t.txt']
         ))
@@ -45,8 +46,9 @@ class TestArgs(unittest.TestCase):
             abs_path
         )
 
-        self.assertEqual(results[0], '/opt/bin/')
+        self.assertEqual(results[0], '/opt/bin')
 
+        # Test providing a relative path
         rel_path = vars(arg_parser.parse_args(
             ['name_program', '--'+CON.ARG_CONST['opt_path'], 'opt/bin/t.txt']
         ))
@@ -56,7 +58,7 @@ class TestArgs(unittest.TestCase):
             rel_path
         )
 
-        self.assertEqual(results[0], sys.argv[0] + '/opt/bin/')
+        self.assertEqual(results[0], os.path.abspath('opt/bin'))
 
 
 if __name__ == '__main__':

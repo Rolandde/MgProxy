@@ -100,6 +100,11 @@ def getFileNamePath(file_path, parsed_args=None):
         if alt_file_name is not None:
             file_name = alt_file_name
 
+        alt_file_path = parsed_args[ARG_CONST['opt_path']]
+        if alt_file_path is not None:
+            directory = os.path.abspath(alt_file_path)
+            directory = os.path.split(directory)[0]
+
     return (directory, file_name)
 
 
