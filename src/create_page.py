@@ -90,7 +90,6 @@ class MgImageCreator(object):
                     self.pic_count/self.xy[0], 0)))
         pasteImage(self.current_canvas, self.image, xy)
         self.pic_count += 1
-        self.total_pic += 1
 
     def pasteMulti(self, number, directory, file_name):
         '''Pastes the provided image the specified number of times, saving the
@@ -101,15 +100,20 @@ class MgImageCreator(object):
             if self.pic_count == self.xy[0] * self.xy[1]:
                 self.save(directory, file_name)
 
-    def startNextPage(self):
+    def startNextPage(self, save_success):
         '''Prepares a new blank page for pasting of images.
 
-        It clears the current canvas, resents the pic counter and
-        increases the page count.
+        It clears the current canvas. If the save was successful,
+        updates total pics, resets the pic counter and increases the page count.
+        If save fails, resets pic count, but does not count the failed pics.
         '''
         self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
+
+        if save_success:
+            self.total_pic += self.pic_count
+            self.page_count += 1
+
         self.pic_count = 0
-        self.page_count += 1
 
     def reset(self):
         '''Returns the instance to the initial state and returns any errors that
@@ -207,7 +211,9 @@ class MgImageCreator(object):
                 e.filename)
             self.invalid_names.append(error_msg)
 
-        self.startNextPage()
+            self.startNextPage(False)
+        else:
+            self.startNextPage(True)
 
     def logInfo(self, message):
         '''Logs an info message if a logger has been provided'''
