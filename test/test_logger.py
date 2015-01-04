@@ -47,7 +47,8 @@ class LoggerTests(unittest.TestCase):
 
         filelist = [f for f in os.listdir(base_path) if f.endswith(".jpg")]
         for f in filelist:
-            os.remove(os.path.join(base_path, f))
+            if f.startswith('delete'):
+                os.remove(os.path.join(base_path, f))
 
     def testEmptyFile(self):
         '''Tests the log output for an empty file'''
@@ -63,7 +64,8 @@ class LoggerTests(unittest.TestCase):
         file_path = self.helperFilePath('good_input.txt')
 
         # sys.argv always returns a list, so I need to supply a list
-        main([file_path])
+        # The saved jpgs will be called delete.jpg (deleted by tearDown)
+        main([file_path, '-f', 'delete'])
         log_list = self.helperLogTemplate(
             file_path, 4, 1,
             self.logCardPaste((None, 2, None, 'Swamp')),
