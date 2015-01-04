@@ -160,6 +160,18 @@ class LoggerTests(unittest.TestCase):
             )
         )
 
+    def testBadSave(self):
+        '''Test logging of save location that does not exist'''
+        creator = self.helperInitMgCreator()
+        bad_path = '/does/not/exist'
+        file_name = 'page'
+        saved_file_name = 'page0.jpg'
+
+        creator.save(bad_path, file_name)
+        self.log_capt.check(
+            self.logBadSave(bad_path, saved_file_name)
+        )
+
     def helperInitMgCreator(self):
         '''Creates an instance of the MgImageCreator class'''
         return MgImageCreator(
@@ -207,6 +219,16 @@ class LoggerTests(unittest.TestCase):
         return (
             MG_LOGGER_CONST['base_name'], 'INFO',
             MG_LOGGER_CONST['save_loc'] % directory
+        )
+
+    def logBadSave(self, invalid_path, file_name):
+        full_path = os.path.join(invalid_path, file_name)
+        return (
+            MG_LOGGER_CONST['base_name'], 'ERROR',
+            MG_LOGGER_CONST['save_fail'] % (
+                full_path,
+                'No such file or directory'
+            )
         )
 
     def logTotal(self, card_numb, page_numb):
