@@ -1,6 +1,5 @@
 import re
 import os.path
-import sys
 import logging
 
 from src.create_page import MgImageCreator
@@ -61,17 +60,6 @@ def parseFile(f):
     return (valid_list, invalid_lines)
 
 
-def errorLog(msg):
-    '''Prints out error message to the error stream.
-    Expects a list of two element tupples: the offending line and the reason'''
-    if len(msg) > 0:
-        sys.stderr.write('Errors caused certain pictures to be exluded:\n')
-
-    for message in msg:
-        to_write = message[0].strip() + ': ' + message[1].strip() + '\n'
-        sys.stderr.write(to_write)
-
-
 def createMgInstance(parsed_input):
     '''Creates an instance of the MgImageCreator class.'''
     return MgImageCreator(
@@ -125,19 +113,9 @@ def createFromWebOrLocal(parsed_input):
         creator = createMgInstance(parsed_input)
 
         if parsed_input[ARG_CONST['local']]:
-            invalid_cards = creator.createFromLocal(
-                user_input,
-                file_path,
-                file_name
-            )
+            creator.createFromLocal(user_input, file_path, file_name)
         else:
-            invalid_cards = creator.createFromWeb(
-                user_input,
-                file_path,
-                file_name
-            )
-
-        errorLog(invalid_cards)
+            creator.createFromWeb(user_input, file_path, file_name)
 
 
 def main(args=None):

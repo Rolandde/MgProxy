@@ -68,11 +68,6 @@ class MgImageCreator(object):
         self.page_count = 0  # How many pages have been saved
 
         self.current_canvas = createCanvas(dpi, wh, xy)
-        # Holds a list of two element tupples: the name of invalid cards and the
-        # reason.
-        self.invalid_names = []
-
-        # The current image in memory to be pasted
         self.image = None
 
         # Store logger is specified (None otherwise)
@@ -116,17 +111,9 @@ class MgImageCreator(object):
         self.pic_count = 0
 
     def reset(self):
-        '''Returns the instance to the initial state and returns any errors that
-        have occured since the last reset.'''
-
-        # This assigns the invalid_names by value (default is reference), as the
-        # init function will be called to reset the instance
-        invalid_names = list(self.invalid_names)
-
+        '''Returns the instance to the initial state.'''
         # Correctly reset the object so that the instance can be called anew
-        self.__init__(self.dpi, self.wh, self.xy)
-
-        return invalid_names
+        self.__init__(self.dpi, self.wh, self.xy, self.logger)
 
     def create(self, local, name_array, directory, file_name):
         '''Takes a name_array containing the number and name of cards and
