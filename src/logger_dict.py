@@ -56,7 +56,10 @@ MG_LOGGER_CONST = {
     'ct_error': 'Expected Content-Type %s. Received %s instead from %s',
 
     # Failed card download (second placeholder is the reason)
-    'card_error': 'Could not download %s. %s'
+    'card_error': 'Could not download %s. %s',
+
+    # Failed to save file to specified path
+    'save_fail': 'Could not save page as %s. Reason: %s.'
 }
 
 

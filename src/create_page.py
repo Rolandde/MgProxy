@@ -203,14 +203,9 @@ class MgImageCreator(object):
         try:
             self.current_canvas.save(file_path)
         except IOError as e:
-            error_msg = (
-                file_name,
-                'Could not save final image - ' +
-                e.strerror +
-                ' - ' +
-                e.filename)
-            self.invalid_names.append(error_msg)
-
+            self.logError(MG_LOGGER_CONST['save_fail'] % (
+                e.filename, e.strerror
+            ))
             self.startNextPage(False)
         else:
             self.startNextPage(True)
