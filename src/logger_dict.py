@@ -58,6 +58,9 @@ MG_LOGGER_CONST = {
     # Failed card download (second placeholder is the reason)
     'card_error': 'Could not download %s. %s',
 
+    # Failed to open image file
+    'image_file_error': 'Could not open image for card %s. Reason: %s.',
+
     # Failed to save file to specified path
     'save_fail': 'Could not save page as %s. Reason: %s.'
 }

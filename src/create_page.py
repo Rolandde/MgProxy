@@ -11,7 +11,7 @@ except ImportError:
     sys.exit()
 
 from src.get_image import getMgImage, getLocalMgImage
-from src.constants import MgNetworkException
+from src.constants import MgNetworkException, MgImageException
 
 from src.logger_dict import MG_LOGGER_CONST, logCardName
 
@@ -157,6 +157,10 @@ class MgImageCreator(object):
         Return true if no errors were encountered, otherwise returns false
         and logs the errors.
         '''
+
+        # Success will be set to true if no exceptions are raised
+        success = False
+
         try:
             self.image = getMgImage(card_name, set_name)
         except MgNetworkException as reason:
@@ -167,9 +171,15 @@ class MgImageCreator(object):
                     reason
                 )
             )
-            return False
+        except MgImageException as reason:
+            self.logError(MG_LOGGER_CONST['image_file_error'] % (
+                logCardName((None, None, set_name, card_name)),
+                reason
+            ))
         else:
-            return True
+            success = True
+
+        return success
 
     def getImageFromDisk(self, directory, card_name):
         self.image = getLocalMgImage(directory, card_name)
