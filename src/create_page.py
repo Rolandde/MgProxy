@@ -10,7 +10,7 @@ except ImportError:
     )
     sys.exit()
 
-from src.get_image import getMgImage, getLocalMgImage, validateImage
+from src.get_image import getMgImage, getLocalMgImage
 from src.constants import MgNetworkException
 
 from src.logger_dict import MG_LOGGER_CONST, logCardName
@@ -131,9 +131,6 @@ class MgImageCreator(object):
                 success = self.getImageFromDisk(directory, card_name)
             else:
                 success = self.getMgImageFromWeb(card_name, set_name)
-
-            if success:
-                validateImage(self.image)
 
             if success:
                 self.image = resizeImage(self.image, self.dpi, self.wh)

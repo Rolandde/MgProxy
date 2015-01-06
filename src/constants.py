@@ -43,3 +43,8 @@ class MgException(Exception):
 class MgNetworkException(MgException):
     '''Thrown if the website cannot be reached.'''
     pass
+
+
+class MgImageException(MgException):
+    '''Thrown if image cannot be opened or manipulated'''
+    pass

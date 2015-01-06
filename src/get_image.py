@@ -5,8 +5,8 @@ import os
 import functools
 
 from StringIO import StringIO
-from src.constants import MgException, MgNetworkException, TIMEOUT
-from src.constants import BASE_URL
+from src.constants import MgNetworkException, MgImageException
+from src.constants import BASE_URL, TIMEOUT
 from src.logger_dict import MG_LOGGER_CONST
 from urlparse import urljoin
 
@@ -118,7 +118,7 @@ def getMgImage(card_name, set_name=None):
     image_stream = getGenericData(address, 'image/jpeg')
     image_stream = StringIO(image_stream)
 
-    return Image.open(image_stream)
+    return openAndValidateImage(image_stream)
 
 
 def createLocalAddress(directory, card_name):
@@ -127,22 +127,23 @@ def createLocalAddress(directory, card_name):
 
 
 def getLocalMgImage(directory, card_name):
+    '''Returns an image found on a local disk'''
     address = createLocalAddress(directory, card_name)
 
-    try:
-        card_image = Image.open(address)
-    except IOError:
-        raise MgException('Cannot open local card image file')
-    else:
-        return card_image
+    return openAndValidateImage(address)
 
 
-def validateImage(image):
-    '''Checks if PIL image is valid.
+def openAndValidateImage(image_file):
+    '''Opens and checks if PIL image is valid.
 
     PIL does not provide a good way to test if an image is corrupt.
-    The easiest way is to load the image into memory and catch the IOError'''
+    The easiest way is to load the image into memory and catch the IOError.
+    Inability to open file or corrupt file will raise IOError.
+    '''
     try:
+        image = Image.open(image_file)
         image.load()
-    except IOError:
-        raise MgException('Image file is corrupt')
+    except IOError as e:
+        raise MgImageException(str(e))
+
+    return image
