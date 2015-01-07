@@ -182,8 +182,17 @@ class MgImageCreator(object):
         return success
 
     def getImageFromDisk(self, directory, card_name):
-        self.image = getLocalMgImage(directory, card_name)
-        return True
+        try:
+            self.image = getLocalMgImage(directory, card_name)
+        except MgImageException as reason:
+            self.logError(MG_LOGGER_CONST['image_file_error'] % (
+                logCardName((None, None, None, card_name)),
+                reason
+            ))
+        else:
+            return True
+
+        return False
 
     def save(self, directory, file_name):
         '''Saves the file_name to the directory.
