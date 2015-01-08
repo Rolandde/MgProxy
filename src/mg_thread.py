@@ -1,10 +1,12 @@
 '''This module houses code that will drive the thread based part of MgProxy'''
 
 from threading import Lock, Thread
+import os
 
 from src.get_image import getMgImage, getLocalMgImage
 from src.constants import MgNetworkException, MgImageException
 from src.logger_dict import MG_LOGGER_CONST, logCardName
+from src.image_manip import createCanvas
 
 # Can be passed to the queue loop to break out of it
 THREAD_END = None
@@ -44,6 +46,7 @@ class MgReport(object):
 
 
 class MgGetImageThread(Thread):
+
     '''A queue based thread for downloading and passing on MG images.
 
     The In-Queue accepts the standard parsed tupple (SB, Card#, Set, Name),
@@ -131,3 +134,54 @@ class MgGetImageThread(Thread):
 
         if self.reporter:
             self.reporter.addError()
+
+
+class MgImageCreateThread(Thread):
+
+    '''A queue based thread that crates a page from individual images.
+
+    As the operations are CPU bound, only one thread of this class should be
+    used. It has been written with that limitation in mind. It spawns threads
+    to save the pages as that is the limiting I/O step in the process.
+    '''
+
+    def __init__(
+        self, dpi, wh, xy, directory, file_name, logger=None, reporter=None
+    ):
+        super(MgImageCreateThread, self).__init__()
+        self.dpi = dpi
+        self.wh = wh
+        self.xy = xy
+
+        self.directory = directory
+        self.file_name = file_name
+
+        self.pic_count = 0  # How many pictures on the current page
+        self.current_page = 0  # How many pages have been created so far
+        self.current_canvas = createCanvas(dpi, wh, xy)
+
+        self.logger = logger
+        self.reporter = reporter
+
+    def save(self, canvas):
+        '''Saves the file_name to the directory.
+
+        It is spawned off as a seperate thread due to its I/O nature.
+        '''
+        new_file_name = str(self.file_name) + str(self.reporter.pages) + '.jpg'
+        file_path = os.path.join(self.directory, new_file_name)
+
+        try:
+            canvas.save(file_path)
+        except IOError as e:
+            self.logError(MG_LOGGER_CONST['save_fail'] % (
+                e.filename, e.strerror
+            ))
+        else:
+            if self.reporter:
+                self.reporter.addPage()
+
+    def logError(self, message):
+        '''Logs an error message if a logger has been provided'''
+        if self.logger:
+            self.logger.error(message)
