@@ -1,6 +1,7 @@
 '''This module houses code that will drive the thread based part of MgProxy'''
 
 from threading import Lock, Thread
+from Queue import Queue
 import os
 
 from src.get_image import getMgImage, getLocalMgImage
@@ -57,7 +58,7 @@ class MgGetImageThread(Thread):
     '''
 
     def __init__(
-        self, in_queue, out_queue, local='', logger=None, reporter=None
+        self, in_queue, out_queue, reporter, local='', logger=None
     ):
         # Call init of Thread before doing anything else
         super(MgGetImageThread, self).__init__()
@@ -147,9 +148,10 @@ class MgImageCreateThread(Thread):
 
     def __init__(
         self, in_queue, dpi, wh, xy, directory, file_name,
-        logger=None, reporter=None
+        reporter, logger=None
     ):
         super(MgImageCreateThread, self).__init__()
+        self.in_queue = in_queue
         self.dpi = dpi
         self.wh = wh
         self.xy = xy
@@ -162,6 +164,10 @@ class MgImageCreateThread(Thread):
 
         self.logger = logger
         self.reporter = reporter
+
+        # As the save functionality is threaded, I need to use locks
+        self.save_lock = Lock()
+        self.save_threads = []
 
     def run(self):
         '''The main loop of the MgImageCreateThread.
@@ -197,7 +203,7 @@ class MgImageCreateThread(Thread):
             self.pic_count % self.xy[0],
             int(round(self.pic_count/self.xy[0], 0))
         )
-        pasteImage(self.current_canvas, xy)
+        pasteImage(self.current_canvas, image, xy)
         self.pic_count += 1
 
     def pasteMulti(self, image, number):
@@ -211,29 +217,37 @@ class MgImageCreateThread(Thread):
 
     def save(self, canvas):
         '''Starts a thread to save the images and resets counters and canvas'''
-        save_thread = Thread(target=self.saveFunc, args=(canvas,))
+        save_thread = Thread(
+            target=self.saveFunc,
+            args=(canvas, self.pic_count)
+        )
+        self.save_threads = [t for t in self.save_threads if t.isAlive()]
+        self.save_threads.append(save_thread)
         save_thread.start()
 
         self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
         self.pic_count = 0
 
-    def saveFunc(self, canvas):
+    def saveFunc(self, canvas, cards_on_page):
         '''Saves the file_name to the directory.
 
         It is spawned off as a seperate thread due to its I/O nature.
         '''
-        new_file_name = str(self.file_name) + str(self.reporter.pages) + '.jpg'
-        file_path = os.path.join(self.directory, new_file_name)
+        with self.save_lock:
+            page_number = self.reporter.pages
+            self.reporter.addPage()
 
+        new_file_name = str(self.file_name) + str(page_number) + '.jpg'
+        file_path = os.path.join(self.directory, new_file_name)
         try:
             canvas.save(file_path)
         except IOError as e:
             self.logError(MG_LOGGER_CONST['save_fail'] % (
                 e.filename, e.strerror
             ))
+            self.reporter.addError()
         else:
-            if self.reporter:
-                self.reporter.addPage()
+            self.reporter.addCards(cards_on_page)
 
     def logError(self, message):
         '''Logs an error message if a logger has been provided'''
@@ -244,3 +258,31 @@ class MgImageCreateThread(Thread):
         '''Logs an info message if a logger has been provided'''
         if self.logger:
             self.logger.info(message)
+
+import logging.config
+from src.logger_dict import MG_LOGGER
+
+logging.config.dictConfig(MG_LOGGER)
+logger = logging.getLogger(MG_LOGGER_CONST['base_name'])
+
+inq = Queue()
+outq = Queue()
+rep = MgReport()
+
+pic_thread = MgImageCreateThread(outq, 300, (2.49, 3.48), (4, 2), '.', 'delete',
+                                 rep, logger)
+pic_thread.start()
+
+for _ in xrange(10):
+    image_thread = MgGetImageThread(inq, outq, rep, logger=logger)
+    image_thread.start()
+
+for _ in xrange(50):
+    inq.put((None, 10, None, 'Forest'))
+
+for _ in xrange(10):
+    inq.put(None)
+inq.join()
+
+outq.put(None)
+outq.join()
