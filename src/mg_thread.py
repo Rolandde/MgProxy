@@ -6,7 +6,7 @@ import os
 from src.get_image import getMgImage, getLocalMgImage
 from src.constants import MgNetworkException, MgImageException
 from src.logger_dict import MG_LOGGER_CONST, logCardName
-from src.image_manip import createCanvas
+from src.image_manip import createCanvas, pasteImage, resizeImage
 
 # Can be passed to the queue loop to break out of it
 THREAD_END = None
@@ -146,7 +146,8 @@ class MgImageCreateThread(Thread):
     '''
 
     def __init__(
-        self, dpi, wh, xy, directory, file_name, logger=None, reporter=None
+        self, in_queue, dpi, wh, xy, directory, file_name,
+        logger=None, reporter=None
     ):
         super(MgImageCreateThread, self).__init__()
         self.dpi = dpi
@@ -157,13 +158,66 @@ class MgImageCreateThread(Thread):
         self.file_name = file_name
 
         self.pic_count = 0  # How many pictures on the current page
-        self.current_page = 0  # How many pages have been created so far
         self.current_canvas = createCanvas(dpi, wh, xy)
 
         self.logger = logger
         self.reporter = reporter
 
+    def run(self):
+        '''The main loop of the MgImageCreateThread.
+
+        Takes the image off the queue, pastes it onto the canvas, and
+        spawns a save thread when the canvas is full.
+        '''
+        while True:
+            card_item = self.in_queue.get()
+            if card_item is THREAD_END:
+                if self.pic_count > 0:
+                    self.save(self.current_canvas)
+
+                self.in_queue.task_done()
+                break
+
+            image, card_tupple = card_item
+            image = resizeImage(image, self.dpi, self.wh)
+            self.pasteMulti(image, card_tupple[1])
+            log_msg = logCardName(card_tupple)
+            self.logInfo(
+                MG_LOGGER_CONST['good_paste'] % (card_tupple[1], log_msg)
+            )
+
+            self.in_queue.task_done()
+
+    def paste(self, image):
+        '''Pastes the image into the next slot on the canvas.
+        TODO: This should throw an exception if there are no more free spaces.
+        TODO: Make the xy variable calculation a lot more readable.
+        '''
+        xy = (
+            self.pic_count % self.xy[0],
+            int(round(self.pic_count/self.xy[0], 0))
+        )
+        pasteImage(self.current_canvas, xy)
+        self.pic_count += 1
+
+    def pasteMulti(self, image, number):
+        '''Pastes the provided image the specified number of times, saving the
+        canvas as required.'''
+        for _ in xrange(0, number):
+            self.paste(image)
+
+            if self.pic_count == self.xy[0] * self.xy[1]:
+                self.save(self.current_canvas)
+
     def save(self, canvas):
+        '''Starts a thread to save the images and resets counters and canvas'''
+        save_thread = Thread(target=self.saveFunc, args=(canvas,))
+        save_thread.start()
+
+        self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
+        self.pic_count = 0
+
+    def saveFunc(self, canvas):
         '''Saves the file_name to the directory.
 
         It is spawned off as a seperate thread due to its I/O nature.
@@ -185,3 +239,8 @@ class MgImageCreateThread(Thread):
         '''Logs an error message if a logger has been provided'''
         if self.logger:
             self.logger.error(message)
+
+    def logInfo(self, message):
+        '''Logs an info message if a logger has been provided'''
+        if self.logger:
+            self.logger.info(message)
