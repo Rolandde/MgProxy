@@ -1,9 +1,16 @@
 '''This module houses code that will drive the thread based part of MgProxy'''
 
-from threading import Lock
+from threading import Lock, Thread
+
+from src.get_image import getMgImage, getLocalMgImage
+from src.constants import MgNetworkException, MgImageException
+from src.logger_dict import MG_LOGGER_CONST, logCardName
+
+# Can be passed to the queue loop to break out of it
+THREAD_END = None
 
 
-class MgInfo(object):
+class MgReport(object):
 
     '''A thread-safe container for information producer by MgProxy.
 
@@ -16,8 +23,7 @@ class MgInfo(object):
         self._lock = Lock()
         self._pages = 0  # Number of pages successfully pasted
         self._cards = 0  # Number of cards successfully pasted
-        self._bad_parse = []  # Input lines that could not be parsed
-        self._bad_card = []  # Cards that could not be retrieved
+        self._errors = 0  # The number of errors encountered by program
 
     def addPage(self):
         with self._lock:
@@ -27,10 +33,96 @@ class MgInfo(object):
         with self._lock:
             self._cards += card_number
 
-    def addBadParse(self, bad):
+    def addError(self):
         with self._lock:
-            self._bad_parse.append(bad)
+            self._errors += 1
 
-    def addBadCard(self, bad):
-        with self._lock:
-            self._bad_card.append(bad)
+
+class MgGetImageThread(Thread):
+    '''A queue based thread for downloading and passing on MG images.
+
+    The In-Queue accepts the standard parsed tupple (SB, Card#, Set, Name),
+    downloads the image and passes it off to the Out-Queue. In addition,
+    optional thread-safe logging and report objects can be passed to init.
+    By default, gets the images from the web. Provide directory of local images
+    to get images from local folder.
+    '''
+
+    def __init__(
+        self, in_queue, out_queue, local='', logger=None, reporter=None
+    ):
+        # Call init of Thread before doing anything else
+        super(MgGetImageThread, self).__init__()
+
+        self.in_queue = in_queue
+        self.out_queue = out_queue
+        self.local = local
+        self.logger = logger
+        self.reporter = reporter
+
+    def run(self):
+        '''The main loop of the MgGetImageThread.
+
+        Takes items off the In-Queue and passes them off to be processed.
+        The loop can be interrupted by the THREAD_END constant.
+        '''
+        while True:
+            card_item = self.in_queue.get()
+            if card_item is THREAD_END:
+                self.in_queue.task_done()
+                break
+
+            if self.local:
+                self.getImageFromDisk(self.local, card_item)
+            else:
+                self.getMgImageFromWeb(card_item)
+
+            self.in_queue.task_done()
+
+    def getMgImageFromWeb(self, card_tupple):
+        '''Download the image from the web and puts it in Out-Queue.'''
+        card_name = card_tupple[3]
+        set_name = card_tupple[2]
+
+        try:
+            image = getMgImage(card_name, set_name)
+        except MgNetworkException as reason:
+            self.logError(
+                MG_LOGGER_CONST['card_error'] % (
+                    # logCardName expects a tupple of card info
+                    logCardName(card_tupple),
+                    reason
+                )
+            )
+        except MgImageException as reason:
+            self.logError(MG_LOGGER_CONST['image_file_error'] % (
+                logCardName(card_tupple),
+                reason
+            ))
+        else:
+            self.out_queue.put(image)
+
+    def getImageFromDisk(self, directory, card_tupple):
+        '''Get image from local disk and put it in the Out-Queue.'''
+        card_name = card_tupple[3]
+
+        try:
+            image = getLocalMgImage(directory, card_name)
+        except MgImageException as reason:
+            self.logError(MG_LOGGER_CONST['image_file_error'] % (
+                logCardName(card_tupple),
+                reason
+            ))
+        else:
+            self.out_queue(image)
+
+    def logError(self, message):
+        '''Logs an error message if a logger has been provided.
+
+        Also counts up the error in the reporter.
+        '''
+        if self.logger:
+            self.logger.error(message)
+
+        if self.reporter:
+            self.reporter.addError()
