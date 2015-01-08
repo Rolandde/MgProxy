@@ -108,7 +108,7 @@ class MgGetImageThread(Thread):
                 reason
             ))
         else:
-            self.out_queue.put(image)
+            self.out_queue.put((image, card_tupple))
 
     def getImageFromDisk(self, directory, card_tupple):
         '''Get image from local disk and put it in the Out-Queue.'''
@@ -122,7 +122,7 @@ class MgGetImageThread(Thread):
                 reason
             ))
         else:
-            self.out_queue(image)
+            self.out_queue((image, card_tupple))
 
     def logError(self, message):
         '''Logs an error message if a logger has been provided.
