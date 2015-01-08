@@ -37,6 +37,11 @@ class MgReport(object):
         with self._lock:
             self._errors += 1
 
+    @property
+    def pages(self):
+        with self._lock:
+            return self._pages
+
 
 class MgGetImageThread(Thread):
     '''A queue based thread for downloading and passing on MG images.
