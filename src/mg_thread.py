@@ -29,8 +29,11 @@ class MgReport(object):
         self._errors = 0  # The number of errors encountered by program
 
     def addPage(self):
+        '''Adds a page and returns the page count before addition'''
         with self._lock:
+            past_page = self._pages
             self._pages += 1
+            return past_page
 
     def addCards(self, card_number):
         with self._lock:
@@ -165,8 +168,6 @@ class MgImageCreateThread(Thread):
         self.logger = logger
         self.reporter = reporter
 
-        # As the save functionality is threaded, I need to use locks
-        self.save_lock = Lock()
         self.save_threads = []
 
     def run(self):
@@ -233,9 +234,7 @@ class MgImageCreateThread(Thread):
 
         It is spawned off as a seperate thread due to its I/O nature.
         '''
-        with self.save_lock:
-            page_number = self.reporter.pages
-            self.reporter.addPage()
+        page_number = self.reporter.addPage()
 
         new_file_name = str(self.file_name) + str(page_number) + '.jpg'
         file_path = os.path.join(self.directory, new_file_name)
@@ -273,16 +272,18 @@ pic_thread = MgImageCreateThread(outq, 300, (2.49, 3.48), (4, 2), '.', 'delete',
                                  rep, logger)
 pic_thread.start()
 
-for _ in xrange(10):
+for _ in xrange(5):
     image_thread = MgGetImageThread(inq, outq, rep, logger=logger)
     image_thread.start()
 
-for _ in xrange(50):
-    inq.put((None, 10, None, 'Forest'))
+for _ in xrange(9):
+    inq.put((None, 1, None, 'Forest'))
 
-for _ in xrange(10):
+for _ in xrange(5):
     inq.put(None)
 inq.join()
+print 'print finished download'
 
 outq.put(None)
 outq.join()
+print 'DONE'
