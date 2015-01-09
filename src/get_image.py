@@ -3,6 +3,7 @@ import urllib2
 import sys
 import os
 import functools
+import socket
 
 from StringIO import StringIO
 from src.constants import MgNetworkException, MgImageException
@@ -36,29 +37,32 @@ ADDRESS_ERROR = []
 def getGenericData(address, content_type, timeout=TIMEOUT):
     '''Get data of content_type from address.
 
-    Raises MgNetworkException is data cannot be downloaded or if the
+    Raises exception if data cannot be downloaded or if the
     content_type does not match.
+
+    I've moved the whole code in the try block as urllib2 is known to cause
+    leaky exceptions. I've personally seen the read call cause an
+    undocumented socket.timeout exception to be thrown.
     '''
     try:
         response = urllib2.urlopen(address, timeout=timeout)
+        response_content_type = response.info().getheader('Content-Type')
+        if response_content_type != content_type:
+            raise MgNetworkException(
+                MG_LOGGER_CONST['ct_error'] %
+                (content_type, response_content_type, address)
+            )
+
+        file_size = int(response.info().getheader('Content-Length'))
+        return response.read(file_size)
     except urllib2.HTTPError as e:
         raise MgNetworkException(
             MG_LOGGER_CONST['html_error'] % (e.code, address)
         )
-    except urllib2.URLError as e:
+    except (urllib2.URLError, socket.timeout) as e:
         raise MgNetworkException(
             MG_LOGGER_CONST['network_error'] % (address, e.reason)
         )
-
-    response_content_type = response.info().getheader('Content-Type')
-    if response_content_type != content_type:
-        raise MgNetworkException(
-            MG_LOGGER_CONST['ct_error'] %
-            (content_type, response_content_type, address)
-        )
-
-    file_size = int(response.info().getheader('Content-Length'))
-    return response.read(file_size)
 
 
 def addressErrorDecorator(f):
