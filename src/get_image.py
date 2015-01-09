@@ -59,9 +59,13 @@ def getGenericData(address, content_type, timeout=TIMEOUT):
         raise MgNetworkException(
             MG_LOGGER_CONST['html_error'] % (e.code, address)
         )
-    except (urllib2.URLError, socket.timeout) as e:
+    except (urllib2.URLError) as e:
         raise MgNetworkException(
             MG_LOGGER_CONST['network_error'] % (address, e.reason)
+        )
+    except socket.timeout as e:
+        raise MgNetworkException(
+            MG_LOGGER_CONST['network_error'] % (address, str(e))
         )
 
 
