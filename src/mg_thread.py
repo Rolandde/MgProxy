@@ -1,7 +1,6 @@
 '''This module houses code that will drive the thread based part of MgProxy'''
 
 from threading import Lock, Thread
-from Queue import Queue
 import os
 
 from src.get_image import getMgImage, getLocalMgImage
@@ -61,7 +60,7 @@ class MgGetImageThread(Thread):
     '''
 
     def __init__(
-        self, in_queue, out_queue, reporter, local='', logger=None
+        self, in_queue, out_queue, local, reporter, logger=None
     ):
         # Call init of Thread before doing anything else
         super(MgGetImageThread, self).__init__()
@@ -257,33 +256,3 @@ class MgImageCreateThread(Thread):
         '''Logs an info message if a logger has been provided'''
         if self.logger:
             self.logger.info(message)
-
-import logging.config
-from src.logger_dict import MG_LOGGER
-
-logging.config.dictConfig(MG_LOGGER)
-logger = logging.getLogger(MG_LOGGER_CONST['base_name'])
-
-inq = Queue()
-outq = Queue()
-rep = MgReport()
-
-pic_thread = MgImageCreateThread(outq, 300, (2.49, 3.48), (4, 2), '.', 'delete',
-                                 rep, logger)
-pic_thread.start()
-
-for _ in xrange(5):
-    image_thread = MgGetImageThread(inq, outq, rep, logger=logger)
-    image_thread.start()
-
-for _ in xrange(9):
-    inq.put((None, 1, None, 'Forest'))
-
-for _ in xrange(5):
-    inq.put(None)
-inq.join()
-print 'print finished download'
-
-outq.put(None)
-outq.join()
-print 'DONE'
