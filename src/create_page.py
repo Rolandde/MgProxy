@@ -1,6 +1,7 @@
 from Queue import Queue
 
-from src.mg_thread import MgReport, MgGetImageThread, MgImageCreateThread
+from src.mg_thread import (MgReport, MgGetImageThread, MgImageCreateThread,
+                           MgQueueCar)
 from src.constants import IMAGE_GET_THREAD
 
 # from src.logger_dict import MG_LOGGER_CONST, logCardName
@@ -38,7 +39,7 @@ class MgImageCreator(object):
 
         # Load the queue for processing
         for card_tupple in input_array:
-            inq.put(card_tupple)
+            inq.put(MgQueueCar(card_tupple))
 
         # The page creation thread (only one should be created)
         page_thread = MgImageCreateThread(
@@ -56,12 +57,12 @@ class MgImageCreator(object):
             image_getters.append(image_thread)
 
             # Add stop signal for each queue created
-            inq.put(None)
+            inq.put(MgQueueCar())
 
         self.waitForThread(image_getters)
 
         # Stop page_thread
-        outq.put(None)
+        outq.put(MgQueueCar())
         self.waitForThread(page_thread)
 
     def waitForThread(self, thread):

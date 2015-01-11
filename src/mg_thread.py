@@ -8,8 +8,22 @@ from src.constants import MgNetworkException, MgImageException
 from src.logger_dict import MG_LOGGER_CONST, logCardName
 from src.image_manip import createCanvas, pasteImage, resizeImage
 
-# Can be passed to the queue loop to break out of it
-THREAD_END = None
+
+class MgQueueCar(object):
+
+    '''This object is passed between the various queues.
+
+    This allows for a standardized way of accessing objects passed by queues.
+    '''
+
+    def __init__(self, input_tupple=None):
+        self.input_tupple = input_tupple
+
+        # If no input_tupple is supplied, the thread should end
+        self.end_thread = True if input_tupple is None else False
+
+        # The image to be pasted
+        self.image = None
 
 
 class MgReport(object):
@@ -78,20 +92,21 @@ class MgGetImageThread(Thread):
         The loop can be interrupted by the THREAD_END constant.
         '''
         while True:
-            card_item = self.in_queue.get()
-            if card_item is THREAD_END:
+            queue_car = self.in_queue.get()
+            if queue_car.end_thread:
                 self.in_queue.task_done()
                 break
 
             if self.local:
-                self.getImageFromDisk(self.local, card_item)
+                self.getImageFromDisk(self.local, queue_car)
             else:
-                self.getMgImageFromWeb(card_item)
+                self.getMgImageFromWeb(queue_car)
 
             self.in_queue.task_done()
 
-    def getMgImageFromWeb(self, card_tupple):
+    def getMgImageFromWeb(self, queue_car):
         '''Download the image from the web and puts it in Out-Queue.'''
+        card_tupple = queue_car.input_tupple
         card_name = card_tupple[3]
         set_name = card_tupple[2]
 
@@ -111,10 +126,12 @@ class MgGetImageThread(Thread):
                 reason
             ))
         else:
-            self.out_queue.put((image, card_tupple))
+            queue_car.image = image
+            self.out_queue.put(queue_car)
 
-    def getImageFromDisk(self, directory, card_tupple):
+    def getImageFromDisk(self, directory, queue_car):
         '''Get image from local disk and put it in the Out-Queue.'''
+        card_tupple = queue_car.input_tupple
         card_name = card_tupple[3]
 
         try:
@@ -125,7 +142,8 @@ class MgGetImageThread(Thread):
                 reason
             ))
         else:
-            self.out_queue((image, card_tupple))
+            queue_car.image = image
+            self.out_queue(queue_car)
 
     def logError(self, message):
         '''Logs an error message if a logger has been provided.
@@ -176,8 +194,8 @@ class MgImageCreateThread(Thread):
         spawns a save thread when the canvas is full.
         '''
         while True:
-            card_item = self.in_queue.get()
-            if card_item is THREAD_END:
+            queue_car = self.in_queue.get()
+            if queue_car.end_thread:
                 if self.pic_count > 0:
                     self.save(self.current_canvas)
 
@@ -188,9 +206,10 @@ class MgImageCreateThread(Thread):
                 self.in_queue.task_done()
                 break
 
-            image, card_tupple = card_item
-            image = resizeImage(image, self.dpi, self.wh)
-            self.pasteMulti(image, card_tupple[1])
+            queue_car.image = resizeImage(queue_car.image, self.dpi, self.wh)
+            card_tupple = queue_car.input_tupple
+
+            self.pasteMulti(queue_car.image, card_tupple[1])
             log_msg = logCardName(card_tupple)
             self.logInfo(
                 MG_LOGGER_CONST['good_paste'] % (card_tupple[1], log_msg)
