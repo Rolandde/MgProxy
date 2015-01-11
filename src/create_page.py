@@ -28,7 +28,7 @@ class MgImageCreator(object):
         Pages will be saved to directory with file_name
         '''
 
-        # source is an empty string for web, otherwise directory
+        # source is an empty string for web, directory for local images
         source = directory if local else ''
 
         reporter = MgReport()
@@ -42,21 +42,39 @@ class MgImageCreator(object):
         )
         page_thread.start()
 
+        image_getters = []
         for _ in xrange(5):
             image_thread = MgGetImageThread(
                 inq, outq, source, reporter, self.logger
             )
             image_thread.start()
+            image_getters.append(image_thread)
 
         for card_tupple in input_array:
             inq.put(card_tupple)
 
         for _ in xrange(5):
             inq.put(None)
-        inq.join()
+        self.waitForThread(image_getters)
 
         outq.put(None)
-        outq.join()
+        self.waitForThread(page_thread)
+
+    def waitForThread(self, thread):
+        '''Blocks until the threads have finished. Takes instance or list.
+
+        I've chosen to wait for the thread to finish, rather than for the queue
+        to empty. A thread will finish correctly or if an exception is thrown.
+        Unhandled exceptions can easily results in the queue never empying
+        and causing the program to stall.'''
+        try:
+            # Test if list
+            iter(thread)
+        except TypeError:
+            thread.join()
+        else:
+            for t in thread:
+                t.join()
 
     def createFromWeb(self, input_array, directory, file_name):
         '''Wrapper function to run image creation from web-based image files.'''
