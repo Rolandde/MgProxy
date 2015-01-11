@@ -181,6 +181,10 @@ class MgImageCreateThread(Thread):
                 if self.pic_count > 0:
                     self.save(self.current_canvas)
 
+                # Wait for all save threads to end
+                for save in self.save_threads:
+                    save.join()
+
                 self.in_queue.task_done()
                 break
 
