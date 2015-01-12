@@ -6,7 +6,7 @@ BASE_URL_JSON = 'http://mtgjson.com/'  # URL of JSON database
 JSON_EXT = '.json'  # Extension for json files on mtgjson.com
 TIMEOUT = 2  # Timeout (sec) for urllib2.geturl()
 CARD_EXT = '.hq.jpg'  # Extension to add to card html address
-IMAGE_GET_THREAD = 3  # Number of threads created to fetch images
+IMAGE_GET_THREAD = 10  # Number of threads created to fetch images
 
 # The options used for args parsing (see src/argv_input)
 ARG_CONST = {
