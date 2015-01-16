@@ -25,6 +25,9 @@ class MgQueueCar(object):
         # The image to be pasted
         self.image = None
 
+        # How many cards are on the image to be saved
+        self.card_number = None
+
 
 class MgReport(object):
 
@@ -167,25 +170,20 @@ class MgImageCreateThread(Thread):
     '''
 
     def __init__(
-        self, in_queue, dpi, wh, xy, directory, file_name,
-        reporter, logger=None
+        self, in_queue, out_queue, dpi, wh, xy, reporter, logger=None
     ):
         super(MgImageCreateThread, self).__init__()
         self.in_queue = in_queue
+        self.out_queue = out_queue
         self.dpi = dpi
         self.wh = wh
         self.xy = xy
-
-        self.directory = directory
-        self.file_name = file_name
 
         self.pic_count = 0  # How many pictures on the current page
         self.current_canvas = createCanvas(dpi, wh, xy)
 
         self.logger = logger
         self.reporter = reporter
-
-        self.save_threads = []
 
     def run(self):
         '''The main loop of the MgImageCreateThread.
@@ -197,11 +195,9 @@ class MgImageCreateThread(Thread):
             queue_car = self.in_queue.get()
             if queue_car.end_thread:
                 if self.pic_count > 0:
-                    self.save(self.current_canvas)
-
-                # Wait for all save threads to end
-                for save in self.save_threads:
-                    save.join()
+                    # Stop signals should not be passed down the queue
+                    queue_car.end_thread = False
+                    self.save(queue_car, self.current_canvas)
 
                 self.in_queue.task_done()
                 break
@@ -209,7 +205,7 @@ class MgImageCreateThread(Thread):
             queue_car.image = resizeImage(queue_car.image, self.dpi, self.wh)
             card_tupple = queue_car.input_tupple
 
-            self.pasteMulti(queue_car.image, card_tupple[1])
+            self.pasteMulti(queue_car)
             log_msg = logCardName(card_tupple)
             self.logInfo(
                 MG_LOGGER_CONST['good_paste'] % (card_tupple[1], log_msg)
@@ -229,33 +225,62 @@ class MgImageCreateThread(Thread):
         pasteImage(self.current_canvas, image, xy)
         self.pic_count += 1
 
-    def pasteMulti(self, image, number):
+    def pasteMulti(self, queue_car):
         '''Pastes the provided image the specified number of times, saving the
         canvas as required.'''
+        image = queue_car.image
+        number = queue_car.input_tupple[1]
+
         for _ in xrange(0, number):
             self.paste(image)
 
             if self.pic_count == self.xy[0] * self.xy[1]:
-                self.save(self.current_canvas)
+                self.save(queue_car, self.current_canvas)
 
-    def save(self, canvas):
-        '''Starts a thread to save the images and resets counters and canvas'''
-        save_thread = Thread(
-            target=self.saveFunc,
-            args=(canvas, self.pic_count)
-        )
-        self.save_threads = [t for t in self.save_threads if t.isAlive()]
-        self.save_threads.append(save_thread)
-        save_thread.start()
+    def save(self, queue_car, canvas):
+        '''Put the newly created canvas on the output Queue.'''
+        queue_car.image = canvas
+        queue_car.card_number = self.pic_count
+
+        self.out_queue.put(queue_car)
 
         self.current_canvas = createCanvas(self.dpi, self.wh, self.xy)
         self.pic_count = 0
 
-    def saveFunc(self, canvas, cards_on_page):
-        '''Saves the file_name to the directory.
+    def logInfo(self, message):
+        '''Logs an info message if a logger has been provided'''
+        if self.logger:
+            self.logger.info(message)
 
-        It is spawned off as a seperate thread due to its I/O nature.
-        '''
+
+class MgSaveThread(Thread):
+
+    '''Saves the final page to a specific directory with the given filename.
+
+    Saving is the slowest step in the program, due to the slow I/O nature
+    of hard drives. Threading should greatly increase the speed.
+    '''
+
+    def __init__(self, in_queue, directory, file_name, reporter, logger=None):
+        super(MgSaveThread, self).__init__()
+        self.in_queue = in_queue
+        self.directory = directory
+        self.file_name = file_name
+        self.reporter = reporter
+        self.logger = logger
+
+    def run(self):
+        while True:
+            queue_car = self.in_queue.get()
+            if queue_car.end_thread:
+                self.in_queue.task_done()
+                break
+
+            self.saveFunc(queue_car.image, queue_car.card_number)
+            self.in_queue.task_done()
+
+    def saveFunc(self, canvas, cards_on_page):
+        '''Saves the file_name to the directory.'''
         page_number = self.reporter.addPage()
 
         new_file_name = str(self.file_name) + str(page_number) + '.jpg'
@@ -274,8 +299,3 @@ class MgImageCreateThread(Thread):
         '''Logs an error message if a logger has been provided'''
         if self.logger:
             self.logger.error(message)
-
-    def logInfo(self, message):
-        '''Logs an info message if a logger has been provided'''
-        if self.logger:
-            self.logger.info(message)

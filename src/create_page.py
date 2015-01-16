@@ -1,7 +1,7 @@
 from Queue import Queue
 
 from src.mg_thread import (MgReport, MgGetImageThread, MgImageCreateThread,
-                           MgQueueCar)
+                           MgSaveThread, MgQueueCar)
 from src.constants import IMAGE_GET_THREAD
 
 # from src.logger_dict import MG_LOGGER_CONST, logCardName
@@ -34,36 +34,51 @@ class MgImageCreator(object):
         source = directory if local else ''
 
         reporter = MgReport()
-        inq = Queue()
-        outq = Queue()
+        card_input = Queue()
+        image_queue = Queue(10)
+        canvas_queue = Queue(5)
 
         # Load the queue for processing
         for card_tupple in input_array:
-            inq.put(MgQueueCar(card_tupple))
+            card_input.put(MgQueueCar(card_tupple))
+
+        # Create the threads responsible for saving pages
+        save_thread = []
+        for _ in xrange(3):
+            s_thread = MgSaveThread(
+                canvas_queue, directory, file_name, reporter, self.logger
+            )
+            s_thread.start()
+            save_thread.append(s_thread)
 
         # The page creation thread (only one should be created)
         page_thread = MgImageCreateThread(
-            outq, self.dpi, self.wh, self.xy, directory,
-            file_name, reporter, self.logger
+            image_queue, canvas_queue, self.dpi, self.wh, self.xy,
+            reporter, self.logger
         )
         page_thread.start()
 
         image_getters = []
         for _ in xrange(IMAGE_GET_THREAD):
             image_thread = MgGetImageThread(
-                inq, outq, source, reporter, self.logger
+                card_input, image_queue, source, reporter, self.logger
             )
             image_thread.start()
             image_getters.append(image_thread)
 
             # Add stop signal for each queue created
-            inq.put(MgQueueCar())
+            card_input.put(MgQueueCar())
 
         self.waitForThread(image_getters)
 
         # Stop page_thread
-        outq.put(MgQueueCar())
+        image_queue.put(MgQueueCar())
         self.waitForThread(page_thread)
+
+        # Stop save_threads
+        for _ in xrange(3):
+            canvas_queue.put(MgQueueCar())
+        self.waitForThread(save_thread)
 
     def waitForThread(self, thread):
         '''Blocks until the threads have finished. Takes instance or list.
