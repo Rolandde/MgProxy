@@ -64,6 +64,16 @@ class MgReport(object):
         with self._lock:
             return self._pages
 
+    @property
+    def cards(self):
+        with self._lock:
+            return self._cards
+
+    @property
+    def errors(self):
+        with self._lock:
+            return self._errors
+
 
 class MgGetImageThread(Thread):
 

@@ -113,9 +113,15 @@ def createFromWebOrLocal(parsed_input):
         creator = createMgInstance(parsed_input)
 
         if parsed_input[ARG_CONST['local']]:
-            creator.createFromLocal(user_input, file_path, file_name)
+            reporter = creator.createFromLocal(user_input, file_path, file_name)
         else:
-            creator.createFromWeb(user_input, file_path, file_name)
+            reporter = creator.createFromWeb(user_input, file_path, file_name)
+
+        errors = invalid_lines + reporter.errors
+        logger.info(
+            MG_LOGGER_CONST['final_msg'] %
+            (reporter.cards, reporter.pages, errors)
+        )
 
 
 def main(args=None):

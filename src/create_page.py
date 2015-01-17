@@ -5,8 +5,6 @@ from src.mg_thread import (MgReport, MgGetImageThread, MgImageCreateThread,
 from src.constants import (IMAGE_GET_THREAD, PAGE_SAVE_THREAD, MAX_IMAGE_QUEUE,
                            MAX_PAGE_QUEUE)
 
-# from src.logger_dict import MG_LOGGER_CONST, logCardName
-
 
 class MgImageCreator(object):
 
@@ -76,6 +74,8 @@ class MgImageCreator(object):
 
         # Stop and wait for save_threads to finish
         self.stopAndWaitForThread(save_thread, canvas_queue)
+
+        return reporter
 
     def startThread(self, thread, number, *args, **kwargs):
         '''Starts a defined number of threads and returns list
