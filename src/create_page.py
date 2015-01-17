@@ -2,7 +2,8 @@ from Queue import Queue
 
 from src.mg_thread import (MgReport, MgGetImageThread, MgImageCreateThread,
                            MgSaveThread, MgQueueCar)
-from src.constants import IMAGE_GET_THREAD
+from src.constants import (IMAGE_GET_THREAD, PAGE_SAVE_THREAD, MAX_IMAGE_QUEUE,
+                           MAX_PAGE_QUEUE)
 
 # from src.logger_dict import MG_LOGGER_CONST, logCardName
 
@@ -35,8 +36,8 @@ class MgImageCreator(object):
 
         reporter = MgReport()
         card_input = Queue()
-        image_queue = Queue(10)
-        canvas_queue = Queue(5)
+        image_queue = Queue(MAX_IMAGE_QUEUE)
+        canvas_queue = Queue(MAX_PAGE_QUEUE)
 
         # Load the queue for processing
         for card_tupple in input_array:
@@ -44,7 +45,7 @@ class MgImageCreator(object):
 
         # Create the threads responsible for saving pages
         save_thread = []
-        for _ in xrange(3):
+        for _ in xrange(PAGE_SAVE_THREAD):
             s_thread = MgSaveThread(
                 canvas_queue, directory, file_name, reporter, self.logger
             )
@@ -76,7 +77,7 @@ class MgImageCreator(object):
         self.waitForThread(page_thread)
 
         # Stop save_threads
-        for _ in xrange(3):
+        for _ in xrange(PAGE_SAVE_THREAD):
             canvas_queue.put(MgQueueCar())
         self.waitForThread(save_thread)
 
