@@ -202,7 +202,12 @@ class MgImageCreateThread(Thread):
                 self.in_queue.task_done()
                 break
 
-            queue_car.image = resizeImage(queue_car.image, self.dpi, self.wh)
+            resized_image = resizeImage(queue_car.image, self.dpi, self.wh)
+
+            # Explicitly close original image to release memory
+            queue_car.image.close()
+            queue_car.image = resized_image
+
             card_tupple = queue_car.input_tupple
 
             self.pasteMulti(queue_car)
@@ -236,6 +241,9 @@ class MgImageCreateThread(Thread):
 
             if self.pic_count == self.xy[0] * self.xy[1]:
                 self.save(queue_car, self.current_canvas)
+
+        # Explicitly close image after it has been pasted
+        image.close()
 
     def save(self, queue_car, canvas):
         '''Put the newly created canvas on the output Queue.'''
@@ -294,6 +302,9 @@ class MgSaveThread(Thread):
             self.reporter.addError()
         else:
             self.reporter.addCards(cards_on_page)
+        finally:
+            # Explicitly close image
+            canvas.close()
 
     def logError(self, message):
         '''Logs an error message if a logger has been provided'''

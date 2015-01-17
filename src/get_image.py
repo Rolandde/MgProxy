@@ -6,13 +6,12 @@ import functools
 import socket
 
 from StringIO import StringIO
-from src.constants import MgNetworkException, MgImageException
-from src.constants import BASE_URL, TIMEOUT
+from contextlib import closing
+
+from src.constants import (MgNetworkException, MgImageException, BASE_URL,
+                           TIMEOUT, CARD_EXT)
 from src.logger_dict import MG_LOGGER_CONST
 from urlparse import urljoin
-
-# See create address for reason for duplicate import
-import src.constants
 
 try:
     from PIL import Image
@@ -45,16 +44,16 @@ def getGenericData(address, content_type, timeout=TIMEOUT):
     undocumented socket.timeout exception to be thrown.
     '''
     try:
-        response = urllib2.urlopen(address, timeout=timeout)
-        response_content_type = response.info().getheader('Content-Type')
-        if response_content_type != content_type:
-            raise MgNetworkException(
-                MG_LOGGER_CONST['ct_error'] %
-                (content_type, response_content_type, address)
-            )
+        with closing(urllib2.urlopen(address, timeout=timeout)) as response:
+            response_content_type = response.info().getheader('Content-Type')
+            if response_content_type != content_type:
+                raise MgNetworkException(
+                    MG_LOGGER_CONST['ct_error'] %
+                    (content_type, response_content_type, address)
+                )
 
-        file_size = int(response.info().getheader('Content-Length'))
-        return response.read(file_size)
+            file_size = int(response.info().getheader('Content-Length'))
+            return response.read(file_size)
     except urllib2.HTTPError as e:
         raise MgNetworkException(
             MG_LOGGER_CONST['html_error'] % (e.code, address)
@@ -112,8 +111,7 @@ def createAddress(card_name, set_name=None, return_url=BASE_URL):
     else:
         return_url = urljoin(return_url, 'card/')
 
-    # CARD_EXT can be changed (important for test_logging)
-    hq_card_name = urllib.quote(card_name + src.constants.CARD_EXT)
+    hq_card_name = urllib.quote(card_name + CARD_EXT)
     return urljoin(return_url, hq_card_name)
 
 
@@ -124,9 +122,8 @@ def getMgImage(card_name, set_name=None):
     valid image file.'''
     address = createAddress(card_name, set_name)
     image_stream = getGenericData(address, 'image/jpeg')
-    image_stream = StringIO(image_stream)
-
-    return openAndValidateImage(image_stream)
+    with closing(StringIO(image_stream)) as image_stream:
+        return openAndValidateImage(image_stream)
 
 
 def createLocalAddress(directory, card_name):
