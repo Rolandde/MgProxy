@@ -56,7 +56,7 @@ class LoggerTests(unittest.TestCase):
 
         # sys.argv always returns a list, so I need to supply a list
         main([file_path])
-        log_list = self.helperLogTemplate(file_path, 0, 0)
+        log_list = self.helperLogTemplate(file_path, 0, 0, 0)
         self.log_capt.check(*log_list)
 
     def testCorrectFile(self):
@@ -67,7 +67,7 @@ class LoggerTests(unittest.TestCase):
         # The saved jpgs will be called delete.jpg (deleted by tearDown)
         main([file_path, '-f', 'delete'])
         log_list = self.helperLogTemplate(
-            file_path, 4, 1,
+            file_path, 4, 1, 0,
             self.logCardPaste((None, 2, None, 'Swamp')),
             self.logCardPaste((None, 2, 'M10', 'Forest'))
         )
@@ -186,7 +186,7 @@ class LoggerTests(unittest.TestCase):
         base_path = 'test/files'
         return os.path.join(base_path, file_name)
 
-    def helperLogTemplate(self, file_path, cards, pages, *args):
+    def helperLogTemplate(self, file_path, cards, pages, errors, *args):
         '''Creates the boiler blate logging calls'''
         log_list = [self.logStart()]
 
@@ -196,7 +196,7 @@ class LoggerTests(unittest.TestCase):
         if args:
             log_list = log_list + list(args)
 
-        log_list.append(self.logTotal(cards, pages))
+        log_list.append(self.logTotal(cards, pages, errors))
 
         return log_list
 
@@ -233,11 +233,11 @@ class LoggerTests(unittest.TestCase):
             )
         )
 
-    def logTotal(self, card_numb, page_numb):
+    def logTotal(self, card_numb, page_numb, errors):
         '''Returns log message stating card number pasted across numb pages'''
         return (
             MG_LOGGER_CONST['base_name'], 'INFO',
-            MG_LOGGER_CONST['final_msg'] % (card_numb, page_numb)
+            MG_LOGGER_CONST['final_msg'] % (card_numb, page_numb, errors)
         )
 
     def logBadParse(self, line):

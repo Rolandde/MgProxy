@@ -33,8 +33,10 @@ MG_LOGGER_CONST = {
     # The directory where the files are saved to
     'save_loc': 'Files will be saved in %s',
 
-    # Final message summarizing number of images paster and files created
-    'final_msg': 'Summary: %d card(s) pasted across %d page(s).',
+    # Final message summarizing number of cards, pages, and errors
+    'final_msg': (
+        'Summary: %d card(s) pasted across %d page(s) with %d error(s).'
+    ),
 
     # Info message that card has been successfully added
     'good_paste': '%d repeat(s) of %s successfully added.',
