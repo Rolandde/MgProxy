@@ -28,7 +28,12 @@ class MgImageCreator(object):
 
         If local is true, takes pictures from files found in directory.
         Input array is a list of tupples for each card.
-        Pages will be saved to directory with file_name
+        Pages will be saved to directory with file_name.
+
+        Creates three serial Queue chains linking the three created thread
+        groups. First thread group downloads the images from the web,
+        passed them to the thread that creates the printable page, which
+        in turn is passed to the thread group that saves the page to hard disk.
         '''
 
         # source is an empty string for web, directory for local images
@@ -39,47 +44,62 @@ class MgImageCreator(object):
         image_queue = Queue(MAX_IMAGE_QUEUE)
         canvas_queue = Queue(MAX_PAGE_QUEUE)
 
-        # Load the queue for processing
-        for card_tupple in input_array:
-            card_input.put(MgQueueCar(card_tupple))
-
         # Create the threads responsible for saving pages
-        save_thread = []
-        for _ in xrange(PAGE_SAVE_THREAD):
-            s_thread = MgSaveThread(
-                canvas_queue, directory, file_name, reporter, self.logger
-            )
-            s_thread.start()
-            save_thread.append(s_thread)
+        save_thread = self.startThread(
+            MgSaveThread, PAGE_SAVE_THREAD,
+            canvas_queue, directory, file_name, reporter, self.logger
+        )
 
         # The page creation thread (only one should be created)
-        page_thread = MgImageCreateThread(
+        page_thread = self.startThread(
+            MgImageCreateThread, 1,
             image_queue, canvas_queue, self.dpi, self.wh, self.xy,
             reporter, self.logger
         )
-        page_thread.start()
 
-        image_getters = []
-        for _ in xrange(IMAGE_GET_THREAD):
-            image_thread = MgGetImageThread(
-                card_input, image_queue, source, reporter, self.logger
-            )
-            image_thread.start()
-            image_getters.append(image_thread)
+        # The image getter threads are started (the first step in the queue)
+        image_getters = self.startThread(
+            MgGetImageThread, IMAGE_GET_THREAD,
+            card_input, image_queue, source, reporter, self.logger
+        )
 
-            # Add stop signal for each queue created
-            card_input.put(MgQueueCar())
+        # Load the first queue for processing. Initiates the Queue chain.
+        for card_tupple in input_array:
+            card_input.put(MgQueueCar(card_tupple))
 
-        self.waitForThread(image_getters)
+        # Once the Queue chain has been started, the stop signals can be sent
+        # Stop the image_getter threads (once all images have been downloaded)
+        self.stopAndWaitForThread(image_getters, card_input)
 
-        # Stop page_thread
-        image_queue.put(MgQueueCar())
-        self.waitForThread(page_thread)
+        # Stop and wait for page_thread to finish
+        self.stopAndWaitForThread(page_thread, image_queue)
 
-        # Stop save_threads
-        for _ in xrange(PAGE_SAVE_THREAD):
-            canvas_queue.put(MgQueueCar())
-        self.waitForThread(save_thread)
+        # Stop and wait for save_threads to finish
+        self.stopAndWaitForThread(save_thread, canvas_queue)
+
+    def startThread(self, thread, number, *args, **kwargs):
+        '''Starts a defined number of threads and returns list
+
+        Arguements to thread instance can be passed via args and kwargs.
+        '''
+        threads_started = []
+        for _ in xrange(number):
+            new_thread = thread(*args, **kwargs)
+            new_thread.start()
+            threads_started.append(new_thread)
+
+        return threads_started
+
+    def stopAndWaitForThread(self, thread_list, thread_queue):
+        '''Stops the threads in the list and waits for them to finish.
+
+        Note that is does not mattr if any of the threads have unexpectatly
+        ended, as waitForThread accounts for that.
+        '''
+        for thread in thread_list:
+            thread_queue.put(MgQueueCar())
+
+        self.waitForThread(thread_list)
 
     def waitForThread(self, thread):
         '''Blocks until the threads have finished. Takes instance or list.
@@ -89,7 +109,7 @@ class MgImageCreator(object):
         Unhandled exceptions can easily results in the queue never empying
         and causing the program to stall.'''
         try:
-            # Test if list
+            # Test if list of threads
             iter(thread)
         except TypeError:
             thread.join()
