@@ -294,12 +294,14 @@ class MgSaveThread(Thread):
                 self.in_queue.task_done()
                 break
 
-            self.saveFunc(queue_car.image, queue_car.card_number)
+            self.saveFunc(queue_car)
             self.in_queue.task_done()
 
-    def saveFunc(self, canvas, cards_on_page):
+    def saveFunc(self, queue_car):
         '''Saves the file_name to the directory.'''
         page_number = self.reporter.addPage()
+        canvas = queue_car.image
+        cards_on_page = queue_car.card_number
 
         new_file_name = str(self.file_name) + str(page_number) + '.jpg'
         file_path = os.path.join(self.directory, new_file_name)
