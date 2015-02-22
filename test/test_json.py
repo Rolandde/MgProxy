@@ -10,8 +10,8 @@ class GetAndParseMTGJson(unittest.TestCase):
 
     def setUp(self):
         '''Loads the local json file to test against.'''
-        f = open('test/files/M10.json', 'r')
-        self.mtg_file = json.loads(f.read())
+        with open('test/files/M10.json', 'r') as f:
+            self.mtg_file = json.loads(f.read())
 
     def test_get_json(self):
         '''Test if json file is correctly downloaded and returned'''

@@ -79,8 +79,8 @@ class LoggerTests(unittest.TestCase):
     def testBadParse(self):
         '''Test various versions of bad parse'''
         file_path = self.helperFilePath('bad_parse_input.txt')
-        f = open(file_path, 'rU')
-        parseFile(f)
+        with open(file_path, 'r') as f:
+            parseFile(f)
 
         self.log_capt.check(
             self.logBadParse('Forest'),

@@ -101,27 +101,30 @@ def createFromWebOrLocal(parsed_input):
 
     full_path = parsed_input[ARG_CONST['input_file']]
     try:
-        f = open(full_path, 'rU')
+        with open(full_path, 'r') as f:
+            file_path, file_name = getFileNamePath(full_path, parsed_input)
+            logger.info(MG_LOGGER_CONST['save_loc'] % file_path)
+
+            user_input, invalid_lines = parseFile(f)
+
+            creator = createMgInstance(parsed_input)
+
+            if parsed_input[ARG_CONST['local']]:
+                reporter = creator.createFromLocal(
+                    user_input, file_path, file_name
+                )
+            else:
+                reporter = creator.createFromWeb(
+                    user_input, file_path, file_name
+                )
+
+            errors = invalid_lines + reporter.errors
+            logger.info(
+                MG_LOGGER_CONST['final_msg'] %
+                (reporter.cards, reporter.pages, errors)
+            )
     except IOError:
         logger.critical(MG_LOGGER_CONST['bad_input'] % full_path)
-    else:
-        file_path, file_name = getFileNamePath(full_path, parsed_input)
-        logger.info(MG_LOGGER_CONST['save_loc'] % file_path)
-
-        user_input, invalid_lines = parseFile(f)
-
-        creator = createMgInstance(parsed_input)
-
-        if parsed_input[ARG_CONST['local']]:
-            reporter = creator.createFromLocal(user_input, file_path, file_name)
-        else:
-            reporter = creator.createFromWeb(user_input, file_path, file_name)
-
-        errors = invalid_lines + reporter.errors
-        logger.info(
-            MG_LOGGER_CONST['final_msg'] %
-            (reporter.cards, reporter.pages, errors)
-        )
 
 
 def main(args=None):
