@@ -6,8 +6,8 @@ BASE_URL_JSON = 'http://mtgjson.com/'  # URL of JSON database
 JSON_EXT = '.json'  # Extension for json files on mtgjson.com
 TIMEOUT = 5  # Timeout (sec) for urllib2.geturl()
 CARD_EXT = '.hq.jpg'  # Extension to add to card html address
-IMAGE_GET_THREAD = 10  # Number of threads created to fetch images
-PAGE_SAVE_THREAD = 3  # Number of threads created to save pages
+IMAGE_GET_THREAD = 3  # Number of threads created to fetch images
+PAGE_SAVE_THREAD = 2  # Number of threads created to save pages
 MAX_IMAGE_QUEUE = 20  # Max number of images that can be stored in a Queue
 MAX_PAGE_QUEUE = 5  # Max number of pages held in Queue
 
