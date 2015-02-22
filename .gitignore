@@ -5,3 +5,9 @@ mg_test.txt
 .ropeproject/
 src/.ropeproject/
 test/.ropeproject/ 
+
+# The python virtualenv to ignore
+py3env
+
+# The c Profiler has been combiled and can be ignored
+gmon.out

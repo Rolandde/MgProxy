@@ -246,7 +246,7 @@ class MgImageCreateThread(Thread):
         image = queue_car.image
         number = queue_car.input_tupple[1]
 
-        for _ in xrange(0, number):
+        for _ in range(0, number):
             self.paste(image)
 
             if self.pic_count == self.xy[0] * self.xy[1]:

@@ -26,7 +26,7 @@ class GetAndParseMTGJson(unittest.TestCase):
         mtg_json = get_mtg_json.getSetJson('M10')
         mtg_parsed = get_mtg_json.parseLocalSetForRarity(mtg_json)
 
-        self.assertItemsEqual(
+        self.assertCountEqual(
             mtg_parsed.keys(), expected_rarity,
             'Not all expected rarities have been parsed'
         )

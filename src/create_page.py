@@ -1,4 +1,4 @@
-from Queue import Queue
+from queue import Queue
 
 from src.mg_thread import (MgReport, MgGetImageThread, MgImageCreateThread,
                            MgSaveThread, MgQueueCar)
@@ -83,7 +83,7 @@ class MgImageCreator(object):
         Arguements to thread instance can be passed via args and kwargs.
         '''
         threads_started = []
-        for _ in xrange(number):
+        for _ in range(number):
             new_thread = thread(*args, **kwargs)
             new_thread.start()
             threads_started.append(new_thread)

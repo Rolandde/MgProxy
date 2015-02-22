@@ -1,7 +1,7 @@
 '''Download and parse JSON files from mtgjson.com'''
 
-import urllib
-from urlparse import urljoin
+import urllib.request, urllib.parse, urllib.error
+from urllib.parse import urljoin
 import json
 
 from src.constants import BASE_URL_JSON, JSON_EXT
@@ -10,7 +10,7 @@ from src.get_image import getGenericData
 
 def createSetAddress(set_code):
     '''Crate a valid URL address to the JSON file for a given set code'''
-    file_name = urllib.quote(set_code + JSON_EXT)
+    file_name = urllib.parse.quote(set_code + JSON_EXT)
     json_url = urljoin(BASE_URL_JSON, 'json/')
     return urljoin(json_url, file_name)
 
@@ -19,6 +19,7 @@ def getSetJson(set_code):
     '''Downloads the JSON data for the given set and returns it as a dict'''
     address = createSetAddress(set_code)
     json_stream = getGenericData(address, 'application/json')
+    json_stream = json_stream.decode('utf-8')
     return json.loads(json_stream)
 
 

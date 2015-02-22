@@ -1,6 +1,9 @@
 import sys
-if sys.version_info[0] != 2:
-    sys.stderr.write('MgProxy only works with Python 2')
+if sys.version_info[0] != 3:
+    sys.stderr.write(
+        'MgProxy only works with Python 3\n' +
+        'Clone the Py2.7_master branch for Python2 support\n'
+    )
     sys.exit()
 
 import logging
