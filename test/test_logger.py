@@ -8,6 +8,7 @@ from src.logger_dict import MG_LOGGER, MG_LOGGER_CONST, logCardName
 from src.mg_proxy_creator import main, getFileNamePath, parseFile
 from src.get_image import createAddress, ADDRESS_ERROR
 from src.create_page import MgImageCreator
+from src.mg_thread import MgQueueCar, MgGetImageThread
 import src.constants as CON
 
 # If testfixtures in not available, skip these tests
@@ -144,12 +145,10 @@ class LoggerTests(unittest.TestCase):
         # Causes the content type error by returning html address
         ADDRESS_ERROR.append('content_type')
 
-        creator = self.helperInitMgCreator()
-        no_set = creator.getMgImageFromWeb('Swamp', None)
-        with_set = creator.getMgImageFromWeb('Forest', 'M10')
-
-        self.assertFalse(no_set)
-        self.assertFalse(with_set)
+        # Thread is never initiated, so only the logger is required
+        creator = MgGetImageThread(None, None, None, None, self.logger)
+        creator.getMgImageFromWeb(MgQueueCar((None, 10, None, 'Swamp')))
+        creator.getMgImageFromWeb(MgQueueCar(('SB:', '1', 'M10',  'Forest')))
 
         self.log_capt.check(
             self.logBadTypeContent(
