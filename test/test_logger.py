@@ -8,6 +8,8 @@ from src.logger_dict import MG_LOGGER, MG_LOGGER_CONST, logCardName
 from src.mg_proxy_creator import main, getFileNamePath, parseFile
 from src.get_image import createAddress, ADDRESS_ERROR
 from src.create_page import MgImageCreator
+from src.mg_thread import MgQueueCar, MgGetImageThread, MgReport, MgSaveThread
+from src.image_manip import createCanvas
 import src.constants as CON
 
 # If testfixtures in not available, skip these tests
@@ -56,7 +58,7 @@ class LoggerTests(unittest.TestCase):
 
         # sys.argv always returns a list, so I need to supply a list
         main([file_path])
-        log_list = self.helperLogTemplate(file_path, 0, 0)
+        log_list = self.helperLogTemplate(file_path, 0, 0, 0)
         self.log_capt.check(*log_list)
 
     def testCorrectFile(self):
@@ -67,7 +69,7 @@ class LoggerTests(unittest.TestCase):
         # The saved jpgs will be called delete.jpg (deleted by tearDown)
         main([file_path, '-f', 'delete'])
         log_list = self.helperLogTemplate(
-            file_path, 4, 1,
+            file_path, 4, 1, 0,
             self.logCardPaste((None, 2, None, 'Swamp')),
             self.logCardPaste((None, 2, 'M10', 'Forest'))
         )
@@ -107,36 +109,30 @@ class LoggerTests(unittest.TestCase):
         # Set timeout flag (will be reset in setUp)
         ADDRESS_ERROR.append('timeout')
 
-        creator = self.helperInitMgCreator()
-        no_set = creator.getMgImageFromWeb('Swamp', None)
-        with_set = creator.getMgImageFromWeb('Forest', 'M10')
-
-        self.assertFalse(no_set)
-        self.assertFalse(with_set)
+        creator = self.helperInitGetImage()
+        creator.getMgImageFromWeb(MgQueueCar((None, 10, None, 'Swamp')))
+        creator.getMgImageFromWeb(MgQueueCar(('SB:', '1', 'M10',  'Forest')))
 
         self.log_capt.check(
             self.logNetworkError(
-                (None, None, None, 'Swamp'),
+                (None, 10, None, 'Swamp'),
                 createAddress('Swamp', None)
             ),
             self.logNetworkError(
-                (None, None, 'M10', 'Forest'),
+                ('SB:', 1, 'M10', 'Forest'),
                 createAddress('Forest', 'M10')
             )
         )
 
     def testCard404(self):
         '''Test for non-existant cards'''
-        creator = self.helperInitMgCreator()
-        wrong_card = creator.getMgImageFromWeb('ForestXXX', None)
-        wrong_set = creator.getMgImageFromWeb('Swamp', 'XXX')
-
-        self.assertFalse(wrong_card)
-        self.assertFalse(wrong_set)
+        creator = self.helperInitGetImage()
+        creator.getMgImageFromWeb(MgQueueCar((None, 10, None, 'ForestXXX')))
+        creator.getMgImageFromWeb(MgQueueCar(('SB:', 1, 'XXX', 'Swamp')))
 
         self.log_capt.check(
-            self.logCard404((None, None, None, 'ForestXXX')),
-            self.logCard404((None, None, 'XXX', 'Swamp'))
+            self.logCard404((None, 10, None, 'ForestXXX')),
+            self.logCard404(('SB:', 1, 'XXX', 'Swamp'))
         )
 
     def testBadContentType(self):
@@ -144,32 +140,34 @@ class LoggerTests(unittest.TestCase):
         # Causes the content type error by returning html address
         ADDRESS_ERROR.append('content_type')
 
-        creator = self.helperInitMgCreator()
-        no_set = creator.getMgImageFromWeb('Swamp', None)
-        with_set = creator.getMgImageFromWeb('Forest', 'M10')
-
-        self.assertFalse(no_set)
-        self.assertFalse(with_set)
+        creator = self.helperInitGetImage()
+        creator.getMgImageFromWeb(MgQueueCar((None, 10, None, 'Swamp')))
+        creator.getMgImageFromWeb(MgQueueCar(('SB:', '1', 'M10',  'Forest')))
 
         self.log_capt.check(
             self.logBadTypeContent(
-                (None, None, None, 'Swamp'),
+                (None, 10, None, 'Swamp'),
                 'image/jpeg', 'text/html; charset=utf-8'
             ),
             self.logBadTypeContent(
-                (None, None, 'M10', 'Forest'),
+                ('SB:', 1, 'M10', 'Forest'),
                 'image/jpeg', 'text/html; charset=utf-8'
             )
         )
 
     def testBadSave(self):
         '''Test logging of save location that does not exist'''
-        creator = self.helperInitMgCreator()
+        reporter = MgReport()
         bad_path = '/does/not/exist'
         file_name = 'page'
         saved_file_name = 'page0.jpg'
+        saver = MgSaveThread(None, bad_path, file_name, reporter, self.logger)
 
-        creator.save(bad_path, file_name)
+        # Fake canvas has to be supplied for the function to manipulate
+        qc = MgQueueCar()
+        qc.image = createCanvas(1, (1, 1), (1, 1))
+
+        saver.saveFunc(qc)
         self.log_capt.check(
             self.logBadSave(bad_path, saved_file_name)
         )
@@ -181,12 +179,21 @@ class LoggerTests(unittest.TestCase):
             (CON.PAGE_X, CON.PAGE_Y), self.logger
         )
 
+    def helperInitGetImage(self):
+        '''Creates an instance of the MgGetImageThread class.
+
+        As the thread will never be run and only used to call
+        getMgImageFromWeb, none of the init variables except the logger
+        need to be supplied.
+        '''
+        return MgGetImageThread(None, None, None, None, self.logger)
+
     def helperFilePath(self, file_name):
         '''Return the relative file path from the module root'''
         base_path = 'test/files'
         return os.path.join(base_path, file_name)
 
-    def helperLogTemplate(self, file_path, cards, pages, *args):
+    def helperLogTemplate(self, file_path, cards, pages, errors, *args):
         '''Creates the boiler blate logging calls'''
         log_list = [self.logStart()]
 
@@ -196,7 +203,7 @@ class LoggerTests(unittest.TestCase):
         if args:
             log_list = log_list + list(args)
 
-        log_list.append(self.logTotal(cards, pages))
+        log_list.append(self.logTotal(cards, pages, errors))
 
         return log_list
 
@@ -233,11 +240,11 @@ class LoggerTests(unittest.TestCase):
             )
         )
 
-    def logTotal(self, card_numb, page_numb):
+    def logTotal(self, card_numb, page_numb, errors):
         '''Returns log message stating card number pasted across numb pages'''
         return (
             MG_LOGGER_CONST['base_name'], 'INFO',
-            MG_LOGGER_CONST['final_msg'] % (card_numb, page_numb)
+            MG_LOGGER_CONST['final_msg'] % (card_numb, page_numb, errors)
         )
 
     def logBadParse(self, line):
