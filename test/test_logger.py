@@ -108,36 +108,30 @@ class LoggerTests(unittest.TestCase):
         # Set timeout flag (will be reset in setUp)
         ADDRESS_ERROR.append('timeout')
 
-        creator = self.helperInitMgCreator()
-        no_set = creator.getMgImageFromWeb('Swamp', None)
-        with_set = creator.getMgImageFromWeb('Forest', 'M10')
-
-        self.assertFalse(no_set)
-        self.assertFalse(with_set)
+        creator = self.helperInitGetImage()
+        creator.getMgImageFromWeb(MgQueueCar((None, 10, None, 'Swamp')))
+        creator.getMgImageFromWeb(MgQueueCar(('SB:', '1', 'M10',  'Forest')))
 
         self.log_capt.check(
             self.logNetworkError(
-                (None, None, None, 'Swamp'),
+                (None, 10, None, 'Swamp'),
                 createAddress('Swamp', None)
             ),
             self.logNetworkError(
-                (None, None, 'M10', 'Forest'),
+                ('SB:', 1, 'M10', 'Forest'),
                 createAddress('Forest', 'M10')
             )
         )
 
     def testCard404(self):
         '''Test for non-existant cards'''
-        creator = self.helperInitMgCreator()
-        wrong_card = creator.getMgImageFromWeb('ForestXXX', None)
-        wrong_set = creator.getMgImageFromWeb('Swamp', 'XXX')
-
-        self.assertFalse(wrong_card)
-        self.assertFalse(wrong_set)
+        creator = self.helperInitGetImage()
+        creator.getMgImageFromWeb(MgQueueCar((None, 10, None, 'ForestXXX')))
+        creator.getMgImageFromWeb(MgQueueCar(('SB:', 1, 'XXX', 'Swamp')))
 
         self.log_capt.check(
-            self.logCard404((None, None, None, 'ForestXXX')),
-            self.logCard404((None, None, 'XXX', 'Swamp'))
+            self.logCard404((None, 10, None, 'ForestXXX')),
+            self.logCard404(('SB:', 1, 'XXX', 'Swamp'))
         )
 
     def testBadContentType(self):
@@ -145,18 +139,17 @@ class LoggerTests(unittest.TestCase):
         # Causes the content type error by returning html address
         ADDRESS_ERROR.append('content_type')
 
-        # Thread is never initiated, so only the logger is required
-        creator = MgGetImageThread(None, None, None, None, self.logger)
+        creator = self.helperInitGetImage()
         creator.getMgImageFromWeb(MgQueueCar((None, 10, None, 'Swamp')))
         creator.getMgImageFromWeb(MgQueueCar(('SB:', '1', 'M10',  'Forest')))
 
         self.log_capt.check(
             self.logBadTypeContent(
-                (None, None, None, 'Swamp'),
+                (None, 10, None, 'Swamp'),
                 'image/jpeg', 'text/html; charset=utf-8'
             ),
             self.logBadTypeContent(
-                (None, None, 'M10', 'Forest'),
+                ('SB:', 1, 'M10', 'Forest'),
                 'image/jpeg', 'text/html; charset=utf-8'
             )
         )
@@ -179,6 +172,15 @@ class LoggerTests(unittest.TestCase):
             CON.DPI, (CON.WIDTH, CON.HIGHT),
             (CON.PAGE_X, CON.PAGE_Y), self.logger
         )
+
+    def helperInitGetImage(self):
+        '''Creates an instance of the MgGetImageThread class.
+
+        As the thread will never be run and only used to call
+        getMgImageFromWeb, none of the init variables except the logger
+        need to be supplied.
+        '''
+        return MgGetImageThread(None, None, None, None, self.logger)
 
     def helperFilePath(self, file_name):
         '''Return the relative file path from the module root'''
