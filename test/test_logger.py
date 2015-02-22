@@ -8,7 +8,8 @@ from src.logger_dict import MG_LOGGER, MG_LOGGER_CONST, logCardName
 from src.mg_proxy_creator import main, getFileNamePath, parseFile
 from src.get_image import createAddress, ADDRESS_ERROR
 from src.create_page import MgImageCreator
-from src.mg_thread import MgQueueCar, MgGetImageThread
+from src.mg_thread import MgQueueCar, MgGetImageThread, MgReport, MgSaveThread
+from src.image_manip import createCanvas
 import src.constants as CON
 
 # If testfixtures in not available, skip these tests
@@ -156,12 +157,17 @@ class LoggerTests(unittest.TestCase):
 
     def testBadSave(self):
         '''Test logging of save location that does not exist'''
-        creator = self.helperInitMgCreator()
+        reporter = MgReport()
         bad_path = '/does/not/exist'
         file_name = 'page'
         saved_file_name = 'page0.jpg'
+        saver = MgSaveThread(None, bad_path, file_name, reporter, self.logger)
 
-        creator.save(bad_path, file_name)
+        # Fake canvas has to be supplied for the function to manipulate
+        qc = MgQueueCar()
+        qc.image = createCanvas(1, (1, 1), (1, 1))
+
+        saver.saveFunc(qc)
         self.log_capt.check(
             self.logBadSave(bad_path, saved_file_name)
         )
