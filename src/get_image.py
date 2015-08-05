@@ -1,17 +1,18 @@
-import urllib
 import urllib2
 import sys
 import os
 import functools
 import socket
+import random
 
 from StringIO import StringIO
 from contextlib import closing
 
-from src.constants import (MgNetworkException, MgImageException, BASE_URL,
-                           TIMEOUT, CARD_EXT)
+from src.constants import (
+    MgNetworkException, MgImageException, MgLookupException,
+    BASE_URL, TIMEOUT, CARD_URLS
+)
 from src.logger_dict import MG_LOGGER_CONST
-from urlparse import urljoin
 
 try:
     from PIL import Image
@@ -99,21 +100,21 @@ def createAddress(card_name, set_name=None, return_url=BASE_URL):
     '''Creates a URL from a card name and an optional set.
     Correctly escapes characters.'''
 
-    if set_name:
-        if len(set_name) < 4:
-            set_url_dir = 'set/'
+    try:
+        card_urls = CARD_URLS[card_name]
+
+        if set_name is None:
+            url = random.choice(card_urls.values())
         else:
-            set_url_dir = 'setname/'
+            url = card_urls[set_name]
 
-        return_url = urljoin(return_url, set_url_dir)
+        # In case there are multiple cards in a set with  same name (basic land)
+        url = random.choice(url)
+    except KeyError:
+        raise MgLookupException(MG_LOGGER_CONST['image_database_error'])
 
-        set_name = set_name + '/'
-        return_url = urljoin(return_url, set_name)
-    else:
-        return_url = urljoin(return_url, 'card/')
-
-    hq_card_name = urllib.quote(card_name + CARD_EXT)
-    return urljoin(return_url, hq_card_name)
+    final_url = BASE_URL + url
+    return final_url
 
 
 def getMgImage(card_name, set_name=None):
