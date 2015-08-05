@@ -1,11 +1,34 @@
+import sys
+import json
+
+
+class MgException(Exception):
+    '''Base Exception class used for this program'''
+    pass
+
+
+class MgNetworkException(MgException):
+    '''Thrown if the website cannot be reached.'''
+    pass
+
+
+class MgImageException(MgException):
+    '''Thrown if image cannot be opened or manipulated'''
+    pass
+
+
+class MgLookupException(MgException):
+    '''Thrown if card cannot be found in local database'''
+    pass
+
+
 DPI = 300  # Default DPI
 WIDTH, HIGHT = 2.49, 3.48  # Default card width and hight in inches
 PAGE_X, PAGE_Y = 4, 2  # Default number of cards per jpg file
-BASE_URL = 'http://mtgimage.com/'  # URL of image database
+BASE_URL = 'http://magiccards.info/scans/en'  # URL of image database
 BASE_URL_JSON = 'http://mtgjson.com/'  # URL of JSON database
 JSON_EXT = '.json'  # Extension for json files on mtgjson.com
 TIMEOUT = 5  # Timeout (sec) for urllib2.geturl()
-CARD_EXT = '.hq.jpg'  # Extension to add to card html address
 IMAGE_GET_THREAD = 3  # Number of threads created to fetch images
 PAGE_SAVE_THREAD = 2  # Number of threads created to save pages
 MAX_IMAGE_QUEUE = 20  # Max number of images that can be stored in a Queue
@@ -38,17 +61,8 @@ ARG_CONST = {
     'opt_path': 'opt_file_path'
 }
 
-
-class MgException(Exception):
-    '''Base Exception class used for this program'''
-    pass
-
-
-class MgNetworkException(MgException):
-    '''Thrown if the website cannot be reached.'''
-    pass
-
-
-class MgImageException(MgException):
-    '''Thrown if image cannot be opened or manipulated'''
-    pass
+try:
+    CARD_URLS = json.load(open('master.json', 'r'))
+except IOError:
+    sys.stderr.write('Cannot open master.json lookup\n')
+    sys.exit()

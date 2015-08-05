@@ -4,7 +4,9 @@ from threading import Lock, Thread
 import os
 
 from src.get_image import getMgImage, getLocalMgImage
-from src.constants import MgNetworkException, MgImageException
+from src.constants import (
+    MgNetworkException, MgImageException, MgLookupException
+)
 from src.logger_dict import MG_LOGGER_CONST, logCardName
 from src.image_manip import createCanvas, pasteImage, resizeImage
 
@@ -138,6 +140,8 @@ class MgGetImageThread(Thread):
                 logCardName(card_tupple),
                 reason
             ))
+        except MgLookupException as reason:
+            self.logError(str(reason) + ': ' + logCardName(card_tupple))
         else:
             queue_car.image = image
             self.out_queue.put(queue_car)

@@ -1,16 +1,20 @@
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import sys
 import os
 import functools
 import socket
+import random
 
 from io import BytesIO
 from contextlib import closing
 
-from src.constants import (MgNetworkException, MgImageException, BASE_URL,
-                           TIMEOUT, CARD_EXT)
+from src.constants import (
+    MgNetworkException, MgImageException, MgLookupException,
+    BASE_URL, TIMEOUT, CARD_URLS
+)
 from src.logger_dict import MG_LOGGER_CONST
-from urllib.parse import urljoin
 
 try:
     from PIL import Image
@@ -43,7 +47,9 @@ def getGenericData(address, content_type, timeout=TIMEOUT):
     undocumented socket.timeout exception to be thrown.
     '''
     try:
-        with closing(urllib.request.urlopen(address, timeout=timeout)) as response:
+        with closing(
+            urllib.request.urlopen(address, timeout=timeout)
+        ) as response:
             response_content_type = response.info()['Content-Type']
             if response_content_type != content_type:
                 raise MgNetworkException(
@@ -98,21 +104,21 @@ def createAddress(card_name, set_name=None, return_url=BASE_URL):
     '''Creates a URL from a card name and an optional set.
     Correctly escapes characters.'''
 
-    if set_name:
-        if len(set_name) < 4:
-            set_url_dir = 'set/'
+    try:
+        card_urls = CARD_URLS[card_name]
+
+        if set_name is None:
+            url = random.choice(list(card_urls.values()))
         else:
-            set_url_dir = 'setname/'
+            url = card_urls[set_name]
 
-        return_url = urljoin(return_url, set_url_dir)
+        # In case there are multiple cards in a set with  same name (basic land)
+        url = random.choice(url)
+    except KeyError:
+        raise MgLookupException(MG_LOGGER_CONST['image_database_error'])
 
-        set_name = set_name + '/'
-        return_url = urljoin(return_url, set_name)
-    else:
-        return_url = urljoin(return_url, 'card/')
-
-    hq_card_name = urllib.parse.quote(card_name + CARD_EXT)
-    return urljoin(return_url, hq_card_name)
+    final_url = BASE_URL + url
+    return final_url
 
 
 def getMgImage(card_name, set_name=None):

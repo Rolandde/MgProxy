@@ -63,6 +63,9 @@ MG_LOGGER_CONST = {
     # Failed to open image file
     'image_file_error': 'Could not open image for card %s. Reason: %s.',
 
+    # Local database copy could not be found
+    'image_database_error': 'Card could not be found in local database',
+
     # Failed to save file to specified path
     'save_fail': 'Could not save page as %s. Reason: %s.'
 }
