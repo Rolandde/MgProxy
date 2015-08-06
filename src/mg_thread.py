@@ -237,10 +237,7 @@ class MgImageCreateThread(Thread):
         TODO: This should throw an exception if there are no more free spaces.
         TODO: Make the xy variable calculation a lot more readable.
         '''
-        xy = (
-            self.pic_count % self.xy[0],
-            int(round(self.pic_count/self.xy[0], 0))
-        )
+        xy = (self.pic_count % self.xy[0], self.pic_count//self.xy[0])
         pasteImage(self.current_canvas, image, xy)
         self.pic_count += 1
 
